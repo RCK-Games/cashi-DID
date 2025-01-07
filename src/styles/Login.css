@@ -1,0 +1,39 @@
+.background{
+    background-color: #fff;
+}
+.formclassName{
+    margin-right: 50vh;
+}
+.button {
+    background-color: #6a0dad;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 10px 30px;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 20px auto;
+    display: block;
+    width: 100%;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+.input{
+    border: 2px solid #6a0dad;
+    border-radius: 8px;
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    -ms-border-radius: 8px;
+    -o-border-radius: 8px;
+
+}
+.label{
+    color: #6a0dad;
+    font-weight: bold;
+}
+.form-group{
+    padding-top: 1.2vh !important;
+}
+.input::placeholder{
+    color: #6a0dad;
+}
