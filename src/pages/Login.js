@@ -44,8 +44,8 @@ export const Login = () => {
         <div className="background">
             <div>
             <h1 style={{color: "#5C1F99", fontSize: "53px", marginTop: "20vh", marginBottom: "0", textAlign: "center"}}>Cashimiro AI</h1>
-                <h2 style={{marginTop: "0", color: "#5C1F99", textAlign: "center", fontSize: "21px"}}>Bienvenidos a <span style={{color: "#06E5E6"}}>cashimiro</span>,
-                    <span style={{display: "block",}}>text text.</span>
+                <h2 style={{marginTop: "0", color: "#5C1F99", textAlign: "center", fontSize: "21px"}}>Bienvenidos a cashimiro,
+                    <span style={{display: "block",}}>registrate y chatea.</span>
                 </h2>
             </div>
             <div style={{marginLeft: "7vh", marginRight:"7vh"}}>
@@ -63,7 +63,7 @@ export const Login = () => {
                         <input type="number" className="form-control input inputText" id="InputAge" placeholder="Edad" ref={inputRefEdad} onInput={handleAgeInput}/>
                     </div>
                     <div style={{marginTop: "2vh"}}>
-                        <button onClick={onClickLogIn} type="submit" className="btn btn-primary button" >Continuar</button>
+                        <button onClick={onClickLogIn} type="submit" className=" btn-primary button" >Continuar</button>
                     </div>
                 </form>
             </div>
