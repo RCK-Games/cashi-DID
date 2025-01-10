@@ -1,16 +1,17 @@
 
 import React, {useState, useEffect, useRef } from "react";
-import * as sdk from "@d-id/client-sdk"
+import * as sdk from "@d-id/client-sdk";
+import logo from "./logo.svg";
 const DIdAgentDemo = () => {
     let agentId = "agt_InewfASc"
     let auth = { type: 'key', clientKey: "Z29vZ2xlLW9hdXRoMnwxMDAzMjYwNTk2MTIwNDYwMDg0NjI6a0VNY1h0LXVwMEpkTUN6STc4dldz" };
     const [agentManager2, setAgentManager] = useState(null);
     let videoElement
     let textArea
-    let langSelect
-    let speechButton
+    //let langSelect
+    //let speechButton
     let answers
-    let connectionLabel
+    //let connectionLabel
     let chatButton
     let speakButton
     let reconnectButton
@@ -27,10 +28,10 @@ const DIdAgentDemo = () => {
     useEffect( () => {
        videoElement = document.querySelector("#videoElement")
        textArea = document.querySelector("#textArea")
-       langSelect = document.querySelector("#langSelect")
-       speechButton = document.querySelector("#speechButton");
+       //langSelect = document.querySelector("#langSelect")
+       //speechButton = document.querySelector("#speechButton");
        answers = document.querySelector("#answers")
-       connectionLabel = document.querySelector("#connectionLabel")
+       //connectionLabel = document.querySelector("#connectionLabel")
        chatButton = document.querySelector('#chatButton')
        speakButton = document.querySelector('#speakButton')
        reconnectButton = document.querySelector('#reconnectButton')
@@ -48,7 +49,7 @@ const DIdAgentDemo = () => {
       agentManager = hold
       setAgentManager(hold);
         console.log("sdk.createAgentManager()", hold)
-        document.querySelector("#previewName").innerHTML = hold.agent.preview_name
+        //document.querySelector("#previewName").innerHTML = hold.agent.preview_name
         
         document.querySelector("#videoElement").style.backgroundImage = `url(${hold.agent.presenter.source_url})`
         hold.connect()
@@ -69,8 +70,8 @@ const DIdAgentDemo = () => {
     
             console.log("onConnectionStateChange(): ", state)
     
-            if (state == "connecting") {
-                connectionLabel.innerHTML = "Connecting.."
+            /*if (state == "connecting") {
+                //connectionLabel.innerHTML = "Connecting.."
                 document.querySelector("#container").style.display = "flex"
                 document.querySelector("#hidden").style.display = "none"
             }
@@ -80,9 +81,9 @@ const DIdAgentDemo = () => {
                 textArea.addEventListener('keypress', (event) => { if (event.key === "Enter") { event.preventDefault(); chat() } })
                 chatButton.removeAttribute("disabled")
                 speakButton.removeAttribute("disabled")
-                langSelect.removeAttribute("disabled")
-                speechButton.removeAttribute("disabled")
-                connectionLabel.innerHTML = "Online"
+                //langSelect.removeAttribute("disabled")
+                //speechButton.removeAttribute("disabled")
+                //connectionLabel.innerHTML = "Online"
             }
     
             else if (state == "disconnected" || state == "closed") {
@@ -92,10 +93,10 @@ const DIdAgentDemo = () => {
                 document.querySelector("#container").style.display = "none"
                 chatButton.setAttribute("disabled", true)
                 speakButton.setAttribute("disabled", true)
-                langSelect.setAttribute("disabled", true)
-                speechButton.setAttribute("disabled", true)
-                connectionLabel.innerHTML = ""
-            }
+                //langSelect.setAttribute("disabled", true)
+                //speechButton.setAttribute("disabled", true)
+                //connectionLabel.innerHTML = ""
+            }*/
         },
     
         // Switching between the idle and streamed videos
@@ -111,7 +112,7 @@ const DIdAgentDemo = () => {
               videoElement.muted = false
               videoElement.src = ""
               videoElement.srcObject = srcObject
-              connectionLabel.innerHTML = "Online"
+              //connectionLabel.innerHTML = "Online"
           }
       },
     
@@ -133,16 +134,16 @@ const DIdAgentDemo = () => {
     
             } else {
               
-                answers.innerHTML += `${timeDisplay()} - [${msg.role}] : ${msg.content}  <br>`
+                //answers.innerHTML += `${timeDisplay()} - [${msg.role}] : ${msg.content}  <br>`
             }
     
             // Auto-scroll to the last message 
-            answers.scrollTop = answers.scrollHeight
+            //answers.scrollTop = answers.scrollHeight
         },
     
         // Error handling
         onError(error, errorData) {
-            connectionLabel.innerHTML = `<span style="color:red">Something went wrong :(</span>`
+            //connectionLabel.innerHTML = `<span style="color:red">Something went wrong :(</span>`
             console.log("Error:", error, "Error Data", errorData)
         }
     
@@ -201,10 +202,11 @@ const DIdAgentDemo = () => {
   return (
     <div id="container">
       <div id="header" className="header">
-        <span id="previewName">Your Agent</span>
-        <span id="connectionLabel">Connecting..</span>
+        <img src={logo} className="header-item left"/>
+        <span id="previewName" className="header-item center">Asegúrate de activar tu audio</span>
+        <img src={logo} className="header-item right"/>
       </div>
-
+      <div className="header-separator"></div>
       <div>
         <video id="videoElement" autoPlay loop></video>
       </div>
@@ -230,11 +232,11 @@ const DIdAgentDemo = () => {
         <textarea
           ref={inputRef}
           id="textArea"
-          placeholder="Type a message"
+          placeholder="Envía un mensaje a Cashimiro"
           autoFocus
         ></textarea>
       </div>
-      <div style={{ display: "flex" }}>
+      {/*<div style={{ display: "flex" }}>
         <select
           id="langSelect"
           title="Speech to Text - Language Selection"
@@ -254,9 +256,9 @@ const DIdAgentDemo = () => {
         <button  id="speechButton" title="Speech to Text - Web Speech API (MDN)">
           &#127908;
         </button>
-      </div>
+      </div>*/}
 
-      <div id="answers"></div>
+      {/*<div id="answers"></div>
 
       <div id="hidden" style={{ display: "none" }}>
         <h2 id="hidden_h2"></h2>
@@ -267,7 +269,8 @@ const DIdAgentDemo = () => {
         >
           Reconnect
         </button>
-      </div>
+      </div>*/}
+      <span className="lowerText">Cashimiro AI puede cometer errores. Verifica la información importante.</span>
     </div>
   );
 };

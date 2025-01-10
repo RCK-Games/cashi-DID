@@ -37,3 +37,7 @@
 .input::placeholder{
     color: #6a0dad;
 }
+.lowerText{
+    color: black;
+    font-size: 8px;
+}
