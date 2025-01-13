@@ -4,7 +4,7 @@ import * as sdk from "@d-id/client-sdk";
 import logo from "./img/Brand_Cashi.png";
 import icon from "./img/Icon_send.png";
 import iconMenu from "./img/Icon_Menu.png";
-const DIdAgentDemo = () => {
+function DIdAgentDemo () {
     let agentId = "agt_InewfASc"
     let auth = { type: 'key', clientKey: "Z29vZ2xlLW9hdXRoMnwxMDAzMjYwNTk2MTIwNDYwMDg0NjI6a0VNY1h0LXVwMEpkTUN6STc4dldz" };
     const [agentManager2, setAgentManager] = useState(null);
