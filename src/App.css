@@ -86,15 +86,15 @@ div {
 }
 
 .header-item.right {
-  margin-right: 2%;
+  margin-right: 5%;
   width: 5%;
-  height: 5%;
+  height: 2%;
 }
 
 .header-item.left {
   margin-left: 2%;
-  width: 5%;
-  height: 5%;
+  width: 2%;
+  height: 2%;
 }
 
 #previewName {
@@ -112,6 +112,8 @@ div {
     display: flex;
     max-width: 500px;
     min-width: 45%;
+    position: absolute;
+    bottom: 9vh;
 }
 
 #textArea {
@@ -123,14 +125,56 @@ div {
   -o-border-radius: 15px;
   padding: 10px;
   border: 1px solid #e0e0e0;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
   background-color: #f9f9f9;
   font-size: 16px;
-  font-weight: bold;
-  color: #6a0dad;
+  color: black;
 }
 
-
+@media(max-width: 768px) {
+  .inputsDiv {
+    display: flex;
+    max-width: 500px;
+    min-width: 85%;
+    position: absolute;
+    bottom: 9vh;
+  }
+  .sendButton {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    z-index: 10;
+    padding: 5px 10px;
+    width: 8%;
+    aspect-ratio: 1;
+    background: #6a0dad;
+    color: white;
+    border: none;
+    border-radius: 100%px;
+    cursor: pointer;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    -ms-border-radius: 50%;
+    -o-border-radius: 50%;
+  }
+  .buttonSendIcon{
+    width: 1vh;
+    aspect-ratio: 1;
+    margin-bottom: 3vh;
+    display: inline-block;
+  }
+  .header-item.right {
+    margin-right: 5%;
+    width: 10%;
+    height: 5%;
+  }
+  
+  .header-item.left {
+    margin-left: 2%;
+    width: 5%;
+    height: 5%;
+  }
+}
 #textArea::placeholder{
   font-weight:bold;
   color: #6a0dad;
@@ -155,8 +199,8 @@ div {
 }
 
 #videoElement {
-    width: 250px;
-    height: 250px;
+    width: 550px;
+    height: 350px;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
@@ -167,4 +211,39 @@ div {
   height: 1.5px;
   background-color: #61dafb;
   margin-top: 0;
+}
+
+.sendButton {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      z-index: 10;
+      padding: 5px 10px;
+      width: 6%;
+      aspect-ratio: 1;
+      background: #6a0dad;
+      color: white;
+      border: none;
+      border-radius: 100%px;
+      cursor: pointer;
+      -webkit-border-radius: 50%;
+      -moz-border-radius: 50%;
+      -ms-border-radius: 50%;
+      -o-border-radius: 50%;
+      place-items: center;
+}
+
+.lowerText{
+  position: absolute;
+  bottom: 7vh
+}
+
+#sidebarButton{
+  height:20%;
+}
+
+.buttonSendIcon{
+  width: 100%;
+  aspect-ratio: 1;
+  margin-bottom: 10%;
 }

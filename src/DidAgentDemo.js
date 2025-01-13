@@ -1,7 +1,9 @@
 
 import React, {useState, useEffect, useRef } from "react";
 import * as sdk from "@d-id/client-sdk";
-import logo from "./logo.svg";
+import logo from "./img/Brand_Cashi.png";
+import icon from "./img/Icon_send.png";
+import iconMenu from "./img/Icon_Menu.png";
 const DIdAgentDemo = () => {
     let agentId = "agt_InewfASc"
     let auth = { type: 'key', clientKey: "Z29vZ2xlLW9hdXRoMnwxMDAzMjYwNTk2MTIwNDYwMDg0NjI6a0VNY1h0LXVwMEpkTUN6STc4dldz" };
@@ -202,7 +204,7 @@ const DIdAgentDemo = () => {
   return (
     <div id="container">
       <div id="header" className="header">
-        <img src={logo} className="header-item left"/>
+        <img src={iconMenu} className="header-item left"/>
         <span id="previewName" className="header-item center">Asegúrate de activar tu audio</span>
         <img src={logo} className="header-item right"/>
       </div>
@@ -211,7 +213,7 @@ const DIdAgentDemo = () => {
         <video id="videoElement" autoPlay loop></video>
       </div>
 
-      <div>
+      {/*<div>
         <button
           id="chatButton"
           title="agentManager.chat() -> Communicate with your Agent (D-ID LLM)"
@@ -226,15 +228,20 @@ const DIdAgentDemo = () => {
         >
           Speak
         </button>
-      </div>
-
+      </div>*/}
+      
       <div className="inputsDiv">
         <textarea
           ref={inputRef}
           id="textArea"
           placeholder="Envía un mensaje a Cashimiro"
           autoFocus
-        ></textarea>
+        >
+        </textarea>
+        <button className="sendButton"
+        id="chatButton"
+        title="agentManager.chat() -> Communicate with your Agent (D-ID LLM)"
+        onClick={chat}><img src={icon} className="buttonSendIcon"/></button>
       </div>
       {/*<div style={{ display: "flex" }}>
         <select
