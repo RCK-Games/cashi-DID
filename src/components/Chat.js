@@ -3,23 +3,9 @@ import '../styles/Chat.css';
 
 const Chat = ({ messages }) => {
 
-    const testMessages = [
-        { content: "Hola, ¿cómo puedo ayudarte?", role: "assistant" },
-        { content: "Quiero información sobre React.", role: "user" },
-        { content: "React es una biblioteca de JavaScript para construir interfaces de usuario.", role: "assistant" },
-        { content: "¿Es fácil de usar?", role: "user" },
-        { content: "Sí, es fácil de aprender y tiene una gran comunidad de soporte.", role: "assistant" },
-        { content: "Perfecto, gracias por la información.", role: "user" },
-        { content: "¡De nada! ¿Hay algo más en lo que te pueda ayudar?", role: "assistant" },
-        { content: "Hola, ¿cómo puedo ayudarte?", role: "assistant" },
-        { content: "Quiero información sobre React.", role: "user" },
-        { content: "React es una biblioteca de JavaScript para construir interfaces de usuario.", role: "assistant" },
-        { content: "¿Es fácil de usar?", role: "user" },
-        { content: "Sí, es fácil de aprender y tiene una gran comunidad de soporte.", role: "assistant" },
-        { content: "Perfecto, gracias por la información.", role: "user" },
-        { content: "¡De nada! ¿Hay algo más en lo que te pueda ayudar?", role: "assistant" }
-      ];
-    messages = testMessages
+  if(messages == null || messages == undefined){
+    return(<></>)
+  }
 
   return (
     <div className='chatContainerParent'>
