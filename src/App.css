@@ -253,12 +253,14 @@ div {
   background-color: white;
   color: black;
   font-weight: bold;
+  width: 100vw !important;
+  height: 100vh;
   
 }
 
 .img-URL{
   padding-right: 2vh;
-  width: 4vw;
+  width: 50px;
 }
 
 .li{
