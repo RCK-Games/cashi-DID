@@ -12,9 +12,9 @@ function Login (){
 
     
     const onClickLogIn= async ()=>{
-        /*
+        
         if(inputRefName.current.value.trim() !== "" && inputRefEmail.current.value.trim() !== "" && inputRefEdad.current.value.trim() !== ""){
-            const response = fetch( "http://165.232.151.217/api/v1/signin",{
+            const response = fetch( "https://cashi.rckgames.com/back/api/v1/signin",{
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -36,8 +36,7 @@ function Login (){
                     console.log(data);
                 })
         }
-        */
-        changeRoute("Main")
+
 
     }
     const handleAgeInput = (e) => {
