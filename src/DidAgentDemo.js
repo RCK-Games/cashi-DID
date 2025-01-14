@@ -1,16 +1,19 @@
 
-import React, {useState, useEffect, useRef } from "react";
+import React, {useState, useEffect, useRef, useContext } from "react";
 import * as sdk from "@d-id/client-sdk";
 import logo from "./img/Brand_Cashi.png";
 import icon from "./img/Icon_send.png";
 import iconMenu from "./img/Icon_Menu.png";
 import { Offcanvas, Button } from "react-bootstrap";
+import { ElementContextRoute } from "./context/RouteContext";
 import "bootstrap/dist/css/bootstrap.min.css";
 import url from "./img/Icon_URL_circle.png"
 function DIdAgentDemo () {
+  const {id} = useContext(ElementContextRoute);
     let agentId = "agt_InewfASc"
     let auth = { type: 'key', clientKey: "Z29vZ2xlLW9hdXRoMnwxMDAzMjYwNTk2MTIwNDYwMDg0NjI6a0VNY1h0LXVwMEpkTUN6STc4dldz" };
     const [agentManager2, setAgentManager] = useState(null);
+    const [firstMessageSend, setFirstMessageSend] = useState(null);
     let videoElement
     let textArea
     //let langSelect
@@ -170,6 +173,24 @@ function DIdAgentDemo () {
     }
 
     const chat  = () => {
+      if(!firstMessageSend){
+        const response = fetch( "https://cashi.rckgames.com/back/api/v1/conversations/started",{
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        id: id
+                    })
+                })
+                .then(response => {
+                    if(!response.ok){
+                        throw new Error("Error en el servidor");
+                    }
+                    return response.json();
+                })
+        setFirstMessageSend(true)
+      }
       console.log(inputRef.current.value)
         let val = inputRef.current.value
         if (val !== "") {
