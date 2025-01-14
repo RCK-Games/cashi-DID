@@ -4,6 +4,9 @@ import * as sdk from "@d-id/client-sdk";
 import logo from "./img/Brand_Cashi.png";
 import icon from "./img/Icon_send.png";
 import iconMenu from "./img/Icon_Menu.png";
+import { Offcanvas, Button } from "react-bootstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
+import url from "./img/Icon_URL_circle.png"
 function DIdAgentDemo () {
     let agentId = "agt_InewfASc"
     let auth = { type: 'key', clientKey: "Z29vZ2xlLW9hdXRoMnwxMDAzMjYwNTk2MTIwNDYwMDg0NjI6a0VNY1h0LXVwMEpkTUN6STc4dldz" };
@@ -201,10 +204,18 @@ function DIdAgentDemo () {
         return formattedTime;
     }
 
+    const [show, setShow] = useState(false);
+
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+
+
   return (
     <div id="container">
       <div id="header" className="header">
-        <img src={iconMenu} className="header-item left"/>
+        <img src={iconMenu} className="header-item left clickable-image"
+         alt="Menu"
+         onClick={handleShow}/>
         <span id="previewName" className="header-item center">Asegúrate de activar tu audio</span>
         <img src={logo} className="header-item right"/>
       </div>
@@ -212,7 +223,7 @@ function DIdAgentDemo () {
       <div>
         <video id="videoElement" autoPlay loop></video>
       </div>
-
+      
       {/*<div>
         <button
           id="chatButton"
@@ -278,7 +289,19 @@ function DIdAgentDemo () {
         </button>
       </div>*/}
       <span className="lowerText">Cashimiro AI puede cometer errores. Verifica la información importante.</span>
+      {/* Sidebar (Offcanvas) */}
+      <Offcanvas show={show} onHide={handleClose}>
+        <Offcanvas.Header closeButton>
+        </Offcanvas.Header>
+        <Offcanvas.Body>
+          {/* Aquí va el contenido del sidebar */}
+          <ul>
+            <li><img src={url} className= "img-URL"></img>Url</li>
+          </ul>
+        </Offcanvas.Body>
+      </Offcanvas>
     </div>
+    
   );
 };
 

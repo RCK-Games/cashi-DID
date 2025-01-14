@@ -245,3 +245,19 @@ div {
   display: block;
 
 }
+
+.offcanvas {
+  background-color: white;
+  color: black;
+  font-weight: bold;
+  
+}
+
+.img-URL{
+  padding-right: 2vh;
+  width: 4vw;
+}
+
+.li{
+  font-size: 1.5rem;
+}
