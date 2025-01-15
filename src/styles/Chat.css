@@ -7,7 +7,7 @@
   }
 
   .spacer{
-    height: 40vh;
+    height: 20vh;
     width: 100%;
   }
   .message {
@@ -32,8 +32,8 @@
   
 .chatContainerParent{
     position: absolute;
-    max-height: 70vh;
-    top: 80px;
+    max-height: 40vh;
+    bottom: 150px;
     left: 10px;
     right: 10px;
     overflow-y: scroll;
