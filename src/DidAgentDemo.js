@@ -11,8 +11,8 @@ import url from "./img/Icon_URL_circle.png"
 import Chat from "./components/Chat";
 function DIdAgentDemo () {
   const {id} = useContext(ElementContextRoute);
-    let agentId = "agt_InewfASc"
-    let auth = { type: 'key', clientKey: "Z29vZ2xlLW9hdXRoMnwxMDAzMjYwNTk2MTIwNDYwMDg0NjI6a0VNY1h0LXVwMEpkTUN6STc4dldz" };
+    let agentId = "agt_vx0f9ZvV"
+    let auth = { type: 'key', clientKey: "Z29vZ2xlLW9hdXRoMnwxMDIxMjk5NDY2Njc4Nzc4MDE4MzA6NUUtYkRRTUdrWFh2dVlUTjRuYkRS" };
     const [agentManager2, setAgentManager] = useState(null);
     const [messageList, setMessageList] = useState(null);
     const [firstMessageSend, setFirstMessageSend] = useState(null);
