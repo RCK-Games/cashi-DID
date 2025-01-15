@@ -1,6 +1,6 @@
-import React from 'react';
-import '../styles/Chat.css';
 import React, { useEffect, useRef } from 'react';
+import '../styles/Chat.css';
+
 const Chat = ({ messages }) => {
 
   const lastMessageRef = useRef(null);
