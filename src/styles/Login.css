@@ -30,6 +30,8 @@
 .label{
     color: #6a0dad;
     font-weight: bold;
+    text-align: left;
+    display: block;
 }
 .form-group{
     padding-top: 1.2vh !important;
@@ -40,4 +42,8 @@
 .lowerText{
     color: black;
     font-size: 8px;
+}
+
+.separatorContainer{
+    position: relative;
 }

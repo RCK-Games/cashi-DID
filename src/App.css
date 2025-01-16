@@ -83,16 +83,15 @@ div {
   margin-left: auto;
   margin-right: auto;
   text-align: center;
+  font-size: 18px !important;
 }
 
 .header-item.right {
-  margin-right: 5%;
   width: 5%;
   height: 2%;
 }
 
 .header-item.left {
-  margin-left: 2%;
   width: 2%;
   height: 2%;
 }
@@ -134,7 +133,6 @@ div {
 @media(max-width: 768px) {
   .inputsDiv {
     display: flex;
-    max-width: 500px;
     min-width: 85%;
     position: absolute;
     bottom: 9vh;
@@ -158,13 +156,12 @@ div {
     -o-border-radius: 50%;
   }
   .header-item.right {
-    margin-right: 5%;
-    width: 10%;
-    height: 5%;
+    margin-right: 3%;
+    width: 15%;
+    height: 10%;
   }
   
   .header-item.left {
-    margin-left: 2%;
     width: 5%;
     height: 5%;
   }
@@ -201,10 +198,14 @@ div {
 }
 
 .header-separator {
-  width: 100%;
-  height: 1.5px;
+  position: fixed;
+  top: 9vh;
+  left: 0;
+  right: 0;
+  height: .2vh;
   background-color: #61dafb;
-  margin-top: 0;
+  margin: 0;
+
 }
 
 .sendButton {
