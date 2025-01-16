@@ -266,3 +266,23 @@ div {
 .li{
   font-size: 1.5rem;
 }
+
+.scrollButtonContainer {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: -20px;
+  z-index: 10;
+}
+
+.scrollButton {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background: url('./img/Circle.png') no-repeat center;
+  background-size: contain;
+  border: none;
+  cursor: pointer;
+}

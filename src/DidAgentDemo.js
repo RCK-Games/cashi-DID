@@ -4,6 +4,7 @@ import * as sdk from "@d-id/client-sdk";
 import logo from "./img/Brand_Cashi.png";
 import icon from "./img/Icon_send.png";
 import iconMenu from "./img/Icon_Menu.png";
+import scrollButton from "./img/Circle.png";
 import { Offcanvas, Button } from "react-bootstrap";
 import { ElementContextRoute } from "./context/RouteContext";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -173,7 +174,6 @@ function DIdAgentDemo () {
         <video id="videoElement" autoPlay loop></video>
       </div>
       <Chat messages={messageList}></Chat>
-
       <div className="inputsDiv">
         <textarea
           ref={inputRef}
