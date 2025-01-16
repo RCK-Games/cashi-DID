@@ -12,7 +12,7 @@
     padding: 10px 30px;
     font-size: 16px;
     cursor: pointer;
-    margin: 20px auto;
+    margin: 10px auto;
     display: block;
     width: 100%;
     text-align: center;
@@ -44,6 +44,3 @@
     font-size: 8px;
 }
 
-.separatorContainer{
-    position: relative;
-}

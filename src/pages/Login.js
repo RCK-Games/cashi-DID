@@ -53,7 +53,7 @@ function Login (){
                     <span style={{display: "block",}}>regístrate y chatea.</span>
                 </h2>
             </div>
-            <div style={{marginLeft: "7vh", marginRight:"7vh"}}>
+            <div style={{marginLeft: "3.7vh", marginRight:"3.7vh"}}>
 
                     <div className="form-group" >
                         <label for="InputName" className='label'>Nombre</label>
