@@ -169,7 +169,10 @@ function DIdAgentDemo () {
         <span id="previewName" className="header-item center">Asegúrate de activar tu audio</span>
         <img src={logo} className="header-item right"/>
       </div>
-      <div className="header-separator"></div>
+      <div className="parent-container">
+        <div className="header-separator"></div>
+      </div>
+
       <div className="videoContainer">
         <video id="videoElement" autoPlay loop></video>
       </div>
