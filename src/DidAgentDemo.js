@@ -169,10 +169,7 @@ function DIdAgentDemo () {
         <span id="previewName" className="header-item center">Asegúrate de activar tu audio</span>
         <img src={logo} className="header-item right"/>
       </div>
-      <div className="separatorContainer">
-        <div className="header-separator"></div>
-      </div>
-
+      <div className="header-separator"></div>
       <div className="videoContainer">
         <video id="videoElement" autoPlay loop></video>
       </div>
@@ -190,7 +187,7 @@ function DIdAgentDemo () {
         title="agentManager.chat() -> Communicate with your Agent (D-ID LLM)"
         onClick={chat}><img src={icon} className="buttonSendIcon"/></button>
       </div>
-      <span className="lowerText">Cashimiro AI puede cometer errores. Verifica la información importante.</span>
+      <h4 className="lowerText">Cashimiro AI puede cometer errores. Verifica la información importante.</h4>
       <Offcanvas show={show} onHide={handleClose}>
         <Offcanvas.Header closeButton>
         </Offcanvas.Header>

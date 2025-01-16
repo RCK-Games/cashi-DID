@@ -133,6 +133,7 @@ div {
 @media(max-width: 768px) {
   .inputsDiv {
     display: flex;
+    max-width: 500px;
     min-width: 85%;
     position: absolute;
     bottom: 9vh;
@@ -232,7 +233,8 @@ div {
 
 .lowerText{
   position: absolute;
-  bottom: 7vh
+  bottom: 5vh;
+  font-size: 13px;
 }
 
 #sidebarButton{
