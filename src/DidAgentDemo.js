@@ -161,7 +161,7 @@ function DIdAgentDemo () {
 
 
   return (
-    <div id="container">
+    <div className="AgentContainer" id="container">
       <div id="header" className="header">
         <img src={iconMenu} className="header-item left clickable-image"
          alt="Menu"

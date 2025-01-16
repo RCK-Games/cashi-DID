@@ -40,3 +40,8 @@
     overflow-y: scroll;
     mask-image: linear-gradient(to bottom, transparent, black 100%, black 20%, transparent);
 }
+
+.AgentContainer {
+  margin: 0px;
+  padding-top: 10px;
+}
