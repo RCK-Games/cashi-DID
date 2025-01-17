@@ -96,11 +96,13 @@ div {
 }
 
 .header-item.right {
+  margin-right: 3%;
   width: 5%;
   height: 2%;
 }
 
 .header-item.left {
+  margin-left: 3%;
   width: 2%;
   height: 2%;
 }
@@ -172,6 +174,7 @@ div {
   }
   
   .header-item.left {
+    margin-left: 3%;
     width: 5%;
     height: 5%;
   }
@@ -212,7 +215,7 @@ div {
   top: 75px;
   width: 100%;
   height: .2vh;
-  background-color: #61dafb;
+  background-color: #F2E5FF;
   margin: 0;
   z-index: 10;
 }

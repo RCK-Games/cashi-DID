@@ -20,14 +20,16 @@
   }
   
   .message.assistant {
-    background-color: #f0f0f0;
+    
+    background-color: #6a0dad;
+    color: white !important;
     align-self: flex-start;
     color: #333;
   }
   
   .message.user {
-    background-color: #6a0dad;
-    color: white;
+    background-color: #F2E5FF;
+    color: #5C1F99;
     align-self: flex-end;
   }
   
