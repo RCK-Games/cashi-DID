@@ -17,6 +17,7 @@ function DIdAgentDemo () {
     const [agentManager2, setAgentManager] = useState(null);
     const [messageList, setMessageList] = useState(null);
     const [firstMessageSend, setFirstMessageSend] = useState(null);
+    const [finishLoading, setFinishLoading] = useState(false);
     let videoElement
     let answers
     const inputRef = useRef(null);
@@ -56,6 +57,7 @@ function DIdAgentDemo () {
         // Connection States callback method
         onConnectionStateChange(state) {
           console.log("onConnectionStateChange(): ", state)
+          setFinishLoading(true);
         },
     
         // Switching between the idle and streamed videos
@@ -104,6 +106,10 @@ function DIdAgentDemo () {
     }
 
     const chat  = () => {
+      if(!finishLoading){
+        return
+      }
+
       if(!firstMessageSend){
         const response = fetch( "https://cashi.rckgames.com/back/api/v1/conversations/started",{
                     method: "POST",
@@ -121,7 +127,6 @@ function DIdAgentDemo () {
                 })
         setFirstMessageSend(true)
       }
-      console.log(inputRef.current.value)
         let val = inputRef.current.value
         if (val !== "") {
             let chat = agentManager.chat(val)

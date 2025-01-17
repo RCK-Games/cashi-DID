@@ -42,6 +42,8 @@
 }
 
 .AgentContainer {
+  z-index: 0;
+  top: 0px;
   margin: 0px;
   padding-top: 10px;
 }

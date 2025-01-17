@@ -10,12 +10,13 @@ function App() {
   const {route} = useContext(ElementContextRoute);
 
   let currentPage ;
+  // eslint-disable-next-line default-case
   switch (route) {
     case "":
       currentPage = (<Login></Login>)
       break;
     case "Main":
-      currentPage = (<DIdAgentDemo></DIdAgentDemo>)
+      currentPage = (<></>)
       break;
     case "Login":
       currentPage = (<Login></Login>)
@@ -24,7 +25,9 @@ function App() {
 
   return (
     <div className="App">
+      <DIdAgentDemo></DIdAgentDemo>
       <>{currentPage}</>
+      
     </div>
   );
 }
