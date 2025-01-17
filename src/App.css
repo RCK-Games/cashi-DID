@@ -217,7 +217,7 @@ div {
   height: .2vh;
   background-color: #F2E5FF;
   margin: 0;
-  z-index: 10;
+  z-index: 1;
 }
 
 .parent-container {
