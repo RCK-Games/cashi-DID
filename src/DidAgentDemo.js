@@ -200,7 +200,7 @@ function DIdAgentDemo () {
         <Offcanvas.Header closeButton>
         </Offcanvas.Header>
         <Offcanvas.Body>
-          <ul>
+          <ul className="ul">
             <li><img src={url} className= "img-URL"></img>Url</li>
           </ul>
         </Offcanvas.Body>
