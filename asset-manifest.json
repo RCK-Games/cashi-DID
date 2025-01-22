@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "/cashi-DID/static/css/main.ecd234fa.css",
-    "main.js": "/cashi-DID/static/js/main.f1c8f3f8.js",
+    "main.js": "/cashi-DID/static/js/main.52cf7bf8.js",
     "static/js/488.07e83a64.chunk.js": "/cashi-DID/static/js/488.07e83a64.chunk.js",
     "static/media/logo.svg": "/cashi-DID/static/media/logo.6ce24c58023cc2f8fd88fe9d219db6c6.svg",
     "index.html": "/cashi-DID/index.html",
     "main.ecd234fa.css.map": "/cashi-DID/static/css/main.ecd234fa.css.map",
-    "main.f1c8f3f8.js.map": "/cashi-DID/static/js/main.f1c8f3f8.js.map",
+    "main.52cf7bf8.js.map": "/cashi-DID/static/js/main.52cf7bf8.js.map",
     "488.07e83a64.chunk.js.map": "/cashi-DID/static/js/488.07e83a64.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.ecd234fa.css",
-    "static/js/main.f1c8f3f8.js"
+    "static/js/main.52cf7bf8.js"
   ]
 }
