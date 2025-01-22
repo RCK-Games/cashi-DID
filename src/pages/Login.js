@@ -14,6 +14,13 @@ function Login (){
     const onClickLogIn= async ()=>{
         
         if(inputRefName.current.value.trim() !== "" && inputRefEmail.current.value.trim() !== "" && inputRefEdad.current.value.trim() !== ""){
+            const emailValue = inputRefEmail.current.value.trim();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          
+            if (!emailRegex.test(emailValue)) {
+              alert("Por favor, ingresa un email válido");
+              return;
+            }
             const response = fetch( "https://cashi.rckgames.com/back/api/v1/signin",{
                     method: "POST",
                     headers: {
