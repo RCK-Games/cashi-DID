@@ -13,7 +13,7 @@ import Chat from "./components/Chat";
 function DIdAgentDemo () {
   const {id} = useContext(ElementContextRoute);
     let agentId = "agt_vx0f9ZvV"
-    let auth = { type: 'key', clientKey: "Z29vZ2xlLW9hdXRoMnwxMDIxMjk5NDY2Njc4Nzc4MDE4MzA6NUUtYkRRTUdrWFh2dVlUTjRuYkRS" };
+    let auth = { type: 'key', clientKey: "Z29vZ2xlLW9hdXRoMnwxMDczMjA4Mjg0ODA5MDc1Nzk4MjM6YzZVUXVXb2s2ZkNTS2RXZnYzZEZN" };
     const [agentManager2, setAgentManager] = useState(null);
     const [messageList, setMessageList] = useState(null);
     const [firstMessageSend, setFirstMessageSend] = useState(null);
