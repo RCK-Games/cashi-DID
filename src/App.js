@@ -1,10 +1,8 @@
-import logo from './logo.svg';
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import { ElementContextRoute } from "./context/RouteContext";
 import React, { useContext } from "react";
 import Login from "./pages/Login"
-import DIdAgentDemo from "./DidAgentDemo";
 import './App.css';
+import StreamingApi from '../src/components/Streaming/StreamingApi';
 
 function App() {
   const {route} = useContext(ElementContextRoute);
@@ -25,7 +23,7 @@ function App() {
 
   return (
     <div className="App">
-      <DIdAgentDemo></DIdAgentDemo>
+      <StreamingApi></StreamingApi>
       <>{currentPage}</>
       
     </div>

@@ -10,10 +10,11 @@ import { ElementContextRoute } from "./context/RouteContext";
 import "bootstrap/dist/css/bootstrap.min.css";
 import url from "./img/Icon_URL_circle.png"
 import Chat from "./components/Chat";
+
 function DIdAgentDemo () {
   const {id} = useContext(ElementContextRoute);
     let agentId = "agt_vx0f9ZvV"
-    let auth = { type: 'key', clientKey: "Z29vZ2xlLW9hdXRoMnwxMDczMjA4Mjg0ODA5MDc1Nzk4MjM6YzZVUXVXb2s2ZkNTS2RXZnYzZEZN" };
+    let auth = { type: 'key', clientKey: process.env.REACT_APP_API_KEY };
     const [agentManager2, setAgentManager] = useState(null);
     const [messageList, setMessageList] = useState(null);
     const [firstMessageSend, setFirstMessageSend] = useState(null);
