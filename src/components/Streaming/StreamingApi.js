@@ -92,6 +92,7 @@ let isStreamReady = !stream_warmup;
     // Step 3: Handle WebSocket responses by message type
     ws.onmessage = async (event) => {
       const data = JSON.parse(event.data);
+      // eslint-disable-next-line default-case
       switch (data.messageType) {
         case 'init-stream':
           const { id: newStreamId, offer, ice_servers: iceServers, session_id: newSessionId } = data;
