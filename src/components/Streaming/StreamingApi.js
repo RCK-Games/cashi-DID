@@ -1,17 +1,15 @@
 
-import { useEffect, useState } from 'react';
+import { useEffect} from 'react';
 import '../../styles/Streaming.css';
 
 const StreamingApi = () => {
 
-const [DID_API, setDID_API] = useState({
+const DID_API = {
   "key": "Y2FzaGltaXJvLmFpQGdtYWlsLmNvbQ:rIjOUHjgu67IHsFNURkAH",
   "url": "https://api.d-id.com",
   "websocketUrl": "wss://ws-api.d-id.com",
   "service": "talks"
-});
-
-
+}
 let peerConnection;
 let pcDataChannel;
 let streamId;
@@ -28,25 +26,16 @@ let ws;
 const stream_warmup = true;
 let isStreamReady = !stream_warmup;
 
-  let idleVideoElement
-  let streamVideoElement
-  let peerStatusLabel
-  let iceStatusLabel
-  let iceGatheringStatusLabel
-  let signalingStatusLabel
-  let streamingStatusLabel
-  let streamEventLabel
+let idleVideoElement
+let streamVideoElement
+
   useEffect(() => {
+     // eslint-disable-next-line react-hooks/exhaustive-deps
      idleVideoElement = document.getElementById('idle-video-element');
+     // eslint-disable-next-line react-hooks/exhaustive-deps
      streamVideoElement = document.getElementById('stream-video-element');
     idleVideoElement.setAttribute('playsinline', '');
     streamVideoElement.setAttribute('playsinline', '');
-     peerStatusLabel = document.getElementById('peer-status-label');
-     iceStatusLabel = document.getElementById('ice-status-label');
-     iceGatheringStatusLabel = document.getElementById('ice-gathering-status-label');
-     signalingStatusLabel = document.getElementById('signaling-status-label');
-     streamingStatusLabel = document.getElementById('streaming-status-label');
-     streamEventLabel = document.getElementById('stream-event-label');
     init()
   }, []);
 
@@ -65,9 +54,11 @@ let isStreamReady = !stream_warmup;
   const init = async ()=>{
     if (DID_API.key === '🤫') alert('Please put your api key inside ./api.json and restart..');
     PRESENTER_TYPE = DID_API.service === 'clips' ? 'clip' : 'talk';
+    await makeConnection()
+    playIdleVideo()
   }
 
-  const connectButton = async ()=>{
+  const makeConnection = async ()=>{
     if (peerConnection && peerConnection.connectionState === 'connected') {
       return;
     }
@@ -132,17 +123,8 @@ let isStreamReady = !stream_warmup;
     console.error('Failed to connect and set up stream:', error.type);
   }}
 
-  const streamAudio = async ()=>{if (
-    (peerConnection?.signalingState === 'stable' || peerConnection?.iceConnectionState === 'connected') &&
-    isStreamReady
-  ) {
-    try {
-      await streamAudioInChunks('https://d-id-public-bucket.s3.us-west-2.amazonaws.com/webrtc.mp3');
-    } catch (error) {
-      console.error('Error streaming audio:', error);
-    }
-  }}
 
+  ///Accionar cuando se llame el sistema para hablar
   const streamWord = async ()=>{const text =
     'This is an example of the WebSocket streaming API <break time="1.5s" /> Making videos is easy with D-ID';
   const chunks = text.split(' ');
@@ -150,6 +132,7 @@ let isStreamReady = !stream_warmup;
   // Indicates end of text stream
   chunks.push('');
 
+  // eslint-disable-next-line no-unused-vars
   for (const [_, chunk] of chunks.entries()) {
     const streamMessage = {
       type: 'stream-text',
@@ -200,8 +183,6 @@ let isStreamReady = !stream_warmup;
 
 
   function onIceGatheringStateChange() {
-    iceGatheringStatusLabel.innerText = peerConnection.iceGatheringState;
-    iceGatheringStatusLabel.className = 'iceGatheringState-' + peerConnection.iceGatheringState;
   }
   
   function onIceCandidate(event) {
@@ -229,8 +210,6 @@ let isStreamReady = !stream_warmup;
     }
   }
   function onIceConnectionStateChange() {
-    iceStatusLabel.innerText = peerConnection.iceConnectionState;
-    iceStatusLabel.className = 'iceConnectionState-' + peerConnection.iceConnectionState;
     if (peerConnection.iceConnectionState === 'failed' || peerConnection.iceConnectionState === 'closed') {
       stopAllStreams();
       closePC();
@@ -238,8 +217,6 @@ let isStreamReady = !stream_warmup;
   }
   function onConnectionStateChange() {
     // not supported in firefox
-    peerStatusLabel.innerText = peerConnection.connectionState;
-    peerStatusLabel.className = 'peerConnectionState-' + peerConnection.connectionState;
     console.log('peerConnection', peerConnection.connectionState);
   
     if (peerConnection.connectionState === 'connected') {
@@ -252,34 +229,25 @@ let isStreamReady = !stream_warmup;
         if (!isStreamReady) {
           console.log('forcing stream/ready');
           isStreamReady = true;
-          streamEventLabel.innerText = 'ready';
-          streamEventLabel.className = 'streamEvent-ready';
         }
       }, 5000);
     }
   }
   function onSignalingStateChange() {
-    signalingStatusLabel.innerText = peerConnection.signalingState;
-    signalingStatusLabel.className = 'signalingState-' + peerConnection.signalingState;
   }
   
   function onVideoStatusChange(videoIsPlaying, stream) {
-    let status;
-  
+
     if (videoIsPlaying) {
-      status = 'streaming';
       streamVideoOpacity = isStreamReady ? 1 : 0;
       setStreamVideoElement(stream);
     } else {
-      status = 'empty';
       streamVideoOpacity = 0;
     }
   
     streamVideoElement.style.opacity = streamVideoOpacity;
     idleVideoElement.style.opacity = 1 - streamVideoOpacity;
-  
-    streamingStatusLabel.innerText = status;
-    streamingStatusLabel.className = 'streamingState-' + status;
+
   }
   
   function onTrack(event) {
@@ -299,6 +267,7 @@ let isStreamReady = !stream_warmup;
       const stats = await peerConnection.getStats(event.track);
       stats.forEach((report) => {
         if (report.type === 'inbound-rtp' && report.kind === 'video') {
+          // eslint-disable-next-line no-mixed-operators
           const videoStatusChanged = videoIsPlaying !== report.bytesReceived > lastBytesReceived;
   
           if (videoStatusChanged) {
@@ -322,6 +291,7 @@ let isStreamReady = !stream_warmup;
   
     if (pcDataChannel.readyState === 'open') {
       let status;
+      // eslint-disable-next-line no-unused-vars
       const [event, _] = message.data.split(':');
   
       switch (event) {
@@ -347,13 +317,10 @@ let isStreamReady = !stream_warmup;
         setTimeout(() => {
           console.log('stream/ready');
           isStreamReady = true;
-          streamEventLabel.innerText = 'ready';
-          streamEventLabel.className = 'streamEvent-ready';
+
         }, 1000);
       } else {
         console.log(event);
-        streamEventLabel.innerText = status === 'dont-care' ? event : status;
-        streamEventLabel.className = 'streamEvent-' + status;
       }
     }
   }
@@ -362,11 +329,6 @@ let isStreamReady = !stream_warmup;
     if (!peerConnection) {
       peerConnection = new RTCPeerConnection({ iceServers });
       pcDataChannel = peerConnection.createDataChannel('JanusDataChannel');
-      peerConnection.addEventListener('icegatheringstatechange', onIceGatheringStateChange, true);
-      peerConnection.addEventListener('icecandidate', onIceCandidate, true);
-      peerConnection.addEventListener('iceconnectionstatechange', onIceConnectionStateChange, true);
-      peerConnection.addEventListener('connectionstatechange', onConnectionStateChange, true);
-      peerConnection.addEventListener('signalingstatechange', onSignalingStateChange, true);
       peerConnection.addEventListener('track', onTrack, true);
       pcDataChannel.addEventListener('message', onStreamEvent, true);
     }
@@ -400,7 +362,7 @@ let isStreamReady = !stream_warmup;
   }
   
   function playIdleVideo() {
-    idleVideoElement.src = DID_API.service == 'clips' ? 'alex_v2_idle.mp4' : 'emma_idle.mp4';
+    idleVideoElement.src = DID_API.service === 'clips' ? 'alex_v2_idle.mp4' : 'emma_idle.mp4';
   }
   
   function stopAllStreams() {
@@ -427,20 +389,12 @@ let isStreamReady = !stream_warmup;
     clearInterval(statsIntervalId);
     isStreamReady = !stream_warmup;
     streamVideoOpacity = 0;
-    iceGatheringStatusLabel.innerText = '';
-    signalingStatusLabel.innerText = '';
-    iceStatusLabel.innerText = '';
-    peerStatusLabel.innerText = '';
-    streamEventLabel.innerText = '';
     console.log('stopped peer connection');
     if (pc === peerConnection) {
       peerConnection = null;
     }
   }
-  
-  const maxRetryCount = 3;
-  const maxDelaySec = 4;
-  
+
   async function connectToWebSocket(url, token) {
     return new Promise((resolve, reject) => {
       const wsUrl = `${url}?authorization=Basic ${encodeURIComponent(token)}`;
@@ -461,7 +415,7 @@ let isStreamReady = !stream_warmup;
       };
     });
   }
-  
+
   function sendMessage(ws, message) {
     if (ws.readyState === WebSocket.OPEN) {
       ws.send(JSON.stringify(message));
@@ -469,54 +423,7 @@ let isStreamReady = !stream_warmup;
       console.error('WebSocket is not open. Cannot send message.');
     }
   }
-  
-  async function streamAudioInChunks(audioUrl, chunkSize = 1024 * 3) {
-    const response = await fetch(audioUrl);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch audio file: ${response.statusText}`);
-    }
-  
-    const arrayBuffer = await response.arrayBuffer();
-    const totalChunks = Math.ceil(arrayBuffer.byteLength / chunkSize);
-  
-    for (let chunkIndex = 0; chunkIndex < totalChunks + 1; chunkIndex++) {
-      const chunk = getChunk(arrayBuffer, chunkIndex, totalChunks, chunkSize);
-      sendStreamMessage(chunk);
-    }
-  }
-  
-  function getChunk(arrayBuffer, chunkIndex, totalChunks, chunkSize) {
-    if (chunkIndex === totalChunks) {
-      return new Uint8Array(0); // Indicates end of audio stream
-    }
-  
-    const start = chunkIndex * chunkSize;
-    const end = Math.min(start + chunkSize, arrayBuffer.byteLength);
-    return new Uint8Array(arrayBuffer.slice(start, end));
-  }
-  
-  function sendStreamMessage(chunk) {
-    const streamMessage = {
-      type: 'stream-audio',
-      payload: {
-        script: {
-          type: 'audio',
-          input: Array.from(chunk),
-        },
-        config: {
-          stitch: true,
-        },
-        background: {
-          color: '#FFFFFF',
-        },
-        session_id: sessionId,
-        stream_id: streamId,
-        presenter_type: PRESENTER_TYPE,
-      },
-    };
-  
-    sendMessage(ws, streamMessage);
-  }
+
 
   return (
     <>
@@ -530,22 +437,10 @@ let isStreamReady = !stream_warmup;
       <br />
 
       <div id="buttons">
-        <button id="connect-button" type="button" onClick={connectButton}>Connect</button>
         <button id="stream-word-button" type="button" onClick={streamWord}>Stream word</button>
-        <button id="stream-audio-button" type="button" onClick={streamAudio}>Stream audio</button>
         <button id="destroy-button" type="button" onClick={destroyButton}>Destroy</button>
       </div>
 
-      <div id="status">
-
-        ICE gathering status: <label id="ice-gathering-status-label"></label><br />
-        ICE status: <label id="ice-status-label"></label><br />
-        Peer connection status: <label id="peer-status-label"></label><br />
-        Signaling status: <label id="signaling-status-label"></label><br />
-        Last stream event: <label id="stream-event-label"></label><br />
-        Streaming status: <label id="streaming-status-label"></label><br />
-      </div>
-      
     </div>
     <script type="module" src="./streaming-client-api-ws.js"></script>
     </>
