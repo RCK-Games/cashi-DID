@@ -1,196 +1,194 @@
-
-import { useEffect} from 'react';
-import '../../styles/Streaming.css';
-
+import { useEffect, useContext } from "react";
+import "../../styles/Streaming.css";
+import emma from "../Streaming/emma_idle.mp4";
+import { ElementContextOpenAi } from "../../context/OpenAiContext";
 const StreamingApi = () => {
+  const { streamWord } = useContext(ElementContextOpenAi);
 
-const DID_API = {
-  "key": "Y2FzaGltaXJvLmFpQGdtYWlsLmNvbQ:rIjOUHjgu67IHsFNURkAH",
-  "url": "https://api.d-id.com",
-  "websocketUrl": "wss://ws-api.d-id.com",
-  "service": "talks"
-}
-let peerConnection;
-let pcDataChannel;
-let streamId;
-let sessionId;
-let sessionClientAnswer;
+  const DID_API = {
+    key: "Y2FzaGltaXJvLmFpQGdtYWlsLmNvbQ:rIjOUHjgu67IHsFNURkAH",
+    url: "https://api.d-id.com",
+    websocketUrl: "wss://ws-api.d-id.com",
+    service: "clips",
+  };
+  let peerConnection;
+  let pcDataChannel;
+  let streamId;
+  let sessionId;
+  let sessionClientAnswer;
 
-let statsIntervalId;
-let lastBytesReceived;
-let videoIsPlaying = false;
-let streamVideoOpacity = 0;
+  let statsIntervalId;
+  let lastBytesReceived;
+  let videoIsPlaying = false;
+  let streamVideoOpacity = 0;
 
-let ws;
+  let ws;
 
-const stream_warmup = true;
-let isStreamReady = !stream_warmup;
+  const stream_warmup = true;
+  let isStreamReady = !stream_warmup;
 
-let idleVideoElement
-let streamVideoElement
+  let idleVideoElement;
+  let streamVideoElement;
 
   useEffect(() => {
-     // eslint-disable-next-line react-hooks/exhaustive-deps
-     idleVideoElement = document.getElementById('idle-video-element');
-     // eslint-disable-next-line react-hooks/exhaustive-deps
-     streamVideoElement = document.getElementById('stream-video-element');
-    idleVideoElement.setAttribute('playsinline', '');
-    streamVideoElement.setAttribute('playsinline', '');
-    init()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    idleVideoElement = document.getElementById("idle-video-element");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    streamVideoElement = document.getElementById("stream-video-element");
+    idleVideoElement.setAttribute("playsinline", "");
+    streamVideoElement.setAttribute("playsinline", "");
+    init();
   }, []);
+
+  useEffect(() => {
+    if (streamWord !== null) {
+      sendWordToServer(streamWord);
+    }
+  }, [streamWord]);
 
   const presenterInputByService = {
     talks: {
-      source_url: 'https://create-images-results.d-id.com/DefaultPresenters/Emma_f/v1_image.jpeg',
+      source_url:
+        "https://create-images-results.d-id.com/DefaultPresenters/Emma_f/v1_image.jpeg",
     },
     clips: {
-      presenter_id: 'v2_public_alex@qcvo4gupoy',
-      driver_id: 'e3nbserss8',
+      presenter_id: "v2_public_alex@qcvo4gupoy",
+      driver_id: "e3nbserss8",
     },
   };
-  let PRESENTER_TYPE 
-  
+  let PRESENTER_TYPE;
 
-  const init = async ()=>{
-    if (DID_API.key === '🤫') alert('Please put your api key inside ./api.json and restart..');
-    PRESENTER_TYPE = DID_API.service === 'clips' ? 'clip' : 'talk';
-    await makeConnection()
-    playIdleVideo()
-  }
+  const init = async () => {
+    if (DID_API.key === "🤫")
+      alert("Please put your api key inside ./api.json and restart..");
+    PRESENTER_TYPE = DID_API.service === "clips" ? "clip" : "talk";
+    await makeConnection();
+  };
 
-  const makeConnection = async ()=>{
-    if (peerConnection && peerConnection.connectionState === 'connected') {
+  const makeConnection = async () => {
+    if (peerConnection && peerConnection.connectionState === "connected") {
       return;
     }
 
-  stopAllStreams();
-  closePC();
+    stopAllStreams();
+    closePC();
 
-  try {
-    // Step 1: Connect to WebSocket
-    ws = await connectToWebSocket(DID_API.websocketUrl, DID_API.key);
+    try {
+      // Step 1: Connect to WebSocket
+      ws = await connectToWebSocket(DID_API.websocketUrl, DID_API.key);
 
-    // Step 2: Send "init-stream" message to WebSocket
-    const startStreamMessage = {
-      type: 'init-stream',
-      payload: {
-        ...presenterInputByService[DID_API.service],
-        presenter_type: PRESENTER_TYPE,
-      },
-    };
-    sendMessage(ws, startStreamMessage);
+      // Step 2: Send "init-stream" message to WebSocket
+      const startStreamMessage = {
+        type: "init-stream",
+        payload: {
+          ...presenterInputByService[DID_API.service],
+          presenter_type: PRESENTER_TYPE,
+        },
+      };
+      sendMessage(ws, startStreamMessage);
 
-    // Step 3: Handle WebSocket responses by message type
-    ws.onmessage = async (event) => {
-      const data = JSON.parse(event.data);
-      // eslint-disable-next-line default-case
-      switch (data.messageType) {
-        case 'init-stream':
-          const { id: newStreamId, offer, ice_servers: iceServers, session_id: newSessionId } = data;
-          streamId = newStreamId;
-          sessionId = newSessionId;
+      // Step 3: Handle WebSocket responses by message type
+      ws.onmessage = async (event) => {
+        const data = JSON.parse(event.data);
+        // eslint-disable-next-line default-case
+        switch (data.messageType) {
+          case "init-stream":
+            const {
+              id: newStreamId,
+              offer,
+              ice_servers: iceServers,
+              session_id: newSessionId,
+            } = data;
+            streamId = newStreamId;
+            sessionId = newSessionId;
 
-          try {
-            sessionClientAnswer = await createPeerConnection(offer, iceServers);
-            // Step 4: Send SDP answer to WebSocket
-            const sdpMessage = {
-              type: 'sdp',
-              payload: {
-                answer: sessionClientAnswer,
-                session_id: sessionId,
-                presenter_type: PRESENTER_TYPE,
-              },
-            };
-            sendMessage(ws, sdpMessage);
-          } catch (e) {
-            console.error('Error during streaming setup', e);
-            stopAllStreams();
-            closePC();
-            return;
-          }
-          break;
+            try {
+              sessionClientAnswer = await createPeerConnection(
+                offer,
+                iceServers
+              );
+              // Step 4: Send SDP answer to WebSocket
+              const sdpMessage = {
+                type: "sdp",
+                payload: {
+                  answer: sessionClientAnswer,
+                  session_id: sessionId,
+                  presenter_type: PRESENTER_TYPE,
+                },
+              };
+              sendMessage(ws, sdpMessage);
+            } catch (e) {
+              console.error("Error during streaming setup", e);
+              stopAllStreams();
+              closePC();
+              return;
+            }
+            break;
 
-        case 'sdp':
-          console.log('SDP message received:', event.data);
-          break;
+          case "sdp":
+            console.log("SDP message received:", event.data);
+            break;
 
-        case 'delete-stream':
-          console.log('Stream deleted:', event.data);
-          break;
-      }
-    };
-  } catch (error) {
-    console.error('Failed to connect and set up stream:', error.type);
-  }}
-
+          case "delete-stream":
+            console.log("Stream deleted:", event.data);
+            break;
+        }
+      };
+    } catch (error) {
+      console.error("Failed to connect and set up stream:", error.type);
+    }
+  };
 
   ///Accionar cuando se llame el sistema para hablar
-  const streamWord = async ()=>{const text =
-    'This is an example of the WebSocket streaming API <break time="1.5s" /> Making videos is easy with D-ID';
-  const chunks = text.split(' ');
+  const sendWordToServer = async () => {
+    console.log("streamWord");
+    const text =
+      'This is an example of the WebSocket streaming API <break time="1.5s" /> Making videos is easy with D-ID';
+    const chunks = text.split(" ");
 
-  // Indicates end of text stream
-  chunks.push('');
+    // Indicates end of text stream
+    chunks.push("");
 
-  // eslint-disable-next-line no-unused-vars
-  for (const [_, chunk] of chunks.entries()) {
-    const streamMessage = {
-      type: 'stream-text',
-      payload: {
-        script: {
-          type: 'text',
-          input: chunk,
-          provider: {
-            type: 'microsoft',
-            voice_id: 'en-US-JennyNeural ',
+    // eslint-disable-next-line no-unused-vars
+    for (const [_, chunk] of chunks.entries()) {
+      const streamMessage = {
+        type: "stream-text",
+        payload: {
+          script: {
+            type: "text",
+            input: chunk,
+            provider: {
+              type: "microsoft",
+              voice_id: "en-US-JennyNeural ",
+            },
+            ssml: true,
           },
-          ssml: true,
+          config: {
+            stitch: true,
+          },
+          apiKeysExternal: {
+            elevenlabs: { key: "" },
+          },
+          background: {
+            color: "#FFFFFF",
+          },
+          session_id: sessionId,
+          stream_id: streamId,
+          presenter_type: PRESENTER_TYPE,
         },
-        config: {
-          stitch: true,
-        },
-        apiKeysExternal: {
-          elevenlabs: { key: '' },
-        },
-        background: {
-          color: '#FFFFFF',
-        },
-        session_id: sessionId,
-        stream_id: streamId,
-        presenter_type: PRESENTER_TYPE,
-      },
-    };
-    sendMessage(ws, streamMessage);
-  }}
-
-  const destroyButton = async ()=>{const streamMessage = {
-    type: 'delete-stream',
-    payload: {
-      session_id: sessionId,
-      stream_id: streamId,
-    },
+      };
+      sendMessage(ws, streamMessage);
+    }
   };
-  sendMessage(ws, streamMessage);
 
-  // Close WebSocket connection
-  if (ws) {
-    ws.close();
-    ws = null;
-  }
+  function onIceGatheringStateChange() {}
 
-  stopAllStreams();
-  closePC();}
-
-
-  function onIceGatheringStateChange() {
-  }
-  
   function onIceCandidate(event) {
-    console.log('onIceCandidate', event);
+    console.log("onIceCandidate", event);
     if (event.candidate) {
       const { candidate, sdpMid, sdpMLineIndex } = event.candidate;
       sendMessage(ws, {
-        type: 'ice',
+        type: "ice",
         payload: {
           session_id: sessionId,
           candidate,
@@ -200,7 +198,7 @@ let streamVideoElement
       });
     } else {
       sendMessage(ws, {
-        type: 'ice',
+        type: "ice",
         payload: {
           stream_id: streamId,
           session_id: sessionId,
@@ -210,46 +208,45 @@ let streamVideoElement
     }
   }
   function onIceConnectionStateChange() {
-    if (peerConnection.iceConnectionState === 'failed' || peerConnection.iceConnectionState === 'closed') {
+    if (
+      peerConnection.iceConnectionState === "failed" ||
+      peerConnection.iceConnectionState === "closed"
+    ) {
       stopAllStreams();
       closePC();
     }
   }
   function onConnectionStateChange() {
     // not supported in firefox
-    console.log('peerConnection', peerConnection.connectionState);
-  
-    if (peerConnection.connectionState === 'connected') {
-      playIdleVideo();
+    console.log("peerConnection", peerConnection.connectionState);
+
+    if (peerConnection.connectionState === "connected") {
       /**
        * A fallback mechanism: if the 'stream/ready' event isn't received within 5 seconds after asking for stream warmup,
        * it updates the UI to indicate that the system is ready to start streaming data.
        */
       setTimeout(() => {
         if (!isStreamReady) {
-          console.log('forcing stream/ready');
+          console.log("forcing stream/ready");
           isStreamReady = true;
         }
       }, 5000);
     }
   }
-  function onSignalingStateChange() {
-  }
-  
-  function onVideoStatusChange(videoIsPlaying, stream) {
+  function onSignalingStateChange() {}
 
+  function onVideoStatusChange(videoIsPlaying, stream) {
     if (videoIsPlaying) {
       streamVideoOpacity = isStreamReady ? 1 : 0;
       setStreamVideoElement(stream);
     } else {
       streamVideoOpacity = 0;
     }
-  
+
     streamVideoElement.style.opacity = streamVideoOpacity;
     idleVideoElement.style.opacity = 1 - streamVideoOpacity;
-
   }
-  
+
   function onTrack(event) {
     /**
      * The following code is designed to provide information about wether currently there is data
@@ -260,16 +257,17 @@ let streamVideoElement
      * https://docs.aws.amazon.com/polly/latest/dg/supportedtags.html#break-tag
      * for seamless results use `config.fluent: true` and provide the same configuration as the streaming video
      */
-  
+
     if (!event.track) return;
-  
+
     statsIntervalId = setInterval(async () => {
       const stats = await peerConnection.getStats(event.track);
       stats.forEach((report) => {
-        if (report.type === 'inbound-rtp' && report.kind === 'video') {
+        if (report.type === "inbound-rtp" && report.kind === "video") {
           // eslint-disable-next-line no-mixed-operators
-          const videoStatusChanged = videoIsPlaying !== report.bytesReceived > lastBytesReceived;
-  
+          const videoStatusChanged =
+            videoIsPlaying !== report.bytesReceived > lastBytesReceived;
+
           if (videoStatusChanged) {
             videoIsPlaying = report.bytesReceived > lastBytesReceived;
             onVideoStatusChange(videoIsPlaying, event.streams[0]);
@@ -279,7 +277,7 @@ let streamVideoElement
       });
     }, 500);
   }
-  
+
   function onStreamEvent(message) {
     /**
      * This function handles stream events received on the data channel.
@@ -288,70 +286,74 @@ let streamVideoElement
      * Until the 'ready' event is received, we hide any streamed video.
      * Additionally, this function processes events for stream start, completion, and errors. Other data events are disregarded.
      */
-  
-    if (pcDataChannel.readyState === 'open') {
+
+    if (pcDataChannel.readyState === "open") {
       let status;
       // eslint-disable-next-line no-unused-vars
-      const [event, _] = message.data.split(':');
-  
+      const [event, _] = message.data.split(":");
+
       switch (event) {
-        case 'stream/started':
-          status = 'started';
+        case "stream/started":
+          status = "started";
           break;
-        case 'stream/done':
-          status = 'done';
+        case "stream/done":
+          status = "done";
           break;
-        case 'stream/ready':
-          status = 'ready';
+        case "stream/ready":
+          status = "ready";
           break;
-        case 'stream/error':
-          status = 'error';
+        case "stream/error":
+          status = "error";
           break;
         default:
-          status = 'dont-care';
+          status = "dont-care";
           break;
       }
-  
-      // Set stream ready after a short delay, adjusting for potential timing differences between data and stream channels
-      if (status === 'ready') {
-        setTimeout(() => {
-          console.log('stream/ready');
-          isStreamReady = true;
 
+      // Set stream ready after a short delay, adjusting for potential timing differences between data and stream channels
+      if (status === "ready") {
+        setTimeout(() => {
+          console.log("stream/ready");
+          isStreamReady = true;
         }, 1000);
       } else {
         console.log(event);
       }
     }
   }
-  
+
   async function createPeerConnection(offer, iceServers) {
     if (!peerConnection) {
       peerConnection = new RTCPeerConnection({ iceServers });
-      pcDataChannel = peerConnection.createDataChannel('JanusDataChannel');
-      peerConnection.addEventListener('track', onTrack, true);
-      pcDataChannel.addEventListener('message', onStreamEvent, true);
+      pcDataChannel = peerConnection.createDataChannel("JanusDataChannel");
+      peerConnection.addEventListener(
+        "connectionstatechange",
+        onConnectionStateChange,
+        true
+      );
+      peerConnection.addEventListener("track", onTrack, true);
+      pcDataChannel.addEventListener("message", onStreamEvent, true);
     }
-  
+
     await peerConnection.setRemoteDescription(offer);
-    console.log('set remote sdp OK');
-  
+    console.log("set remote sdp OK");
+
     const sessionClientAnswer = await peerConnection.createAnswer();
-    console.log('create local sdp OK');
-  
+    console.log("create local sdp OK");
+
     await peerConnection.setLocalDescription(sessionClientAnswer);
-    console.log('set local sdp OK');
-  
+    console.log("set local sdp OK");
+
     return sessionClientAnswer;
   }
-  
+
   function setStreamVideoElement(stream) {
     if (!stream) return;
-  
+
     streamVideoElement.srcObject = stream;
     streamVideoElement.loop = false;
     streamVideoElement.mute = !isStreamReady;
-  
+
     // safari hotfix
     if (streamVideoElement.paused) {
       streamVideoElement
@@ -360,36 +362,53 @@ let streamVideoElement
         .catch((e) => {});
     }
   }
-  
+
   function playIdleVideo() {
-    idleVideoElement.src = DID_API.service === 'clips' ? 'alex_v2_idle.mp4' : 'emma_idle.mp4';
+    idleVideoElement.src =
+      DID_API.service === "clips" ? "alex_v2_idle.mp4" : "emma_idle.mp4";
   }
-  
+
   function stopAllStreams() {
     if (streamVideoElement.srcObject) {
-      console.log('stopping video streams');
+      console.log("stopping video streams");
       streamVideoElement.srcObject.getTracks().forEach((track) => track.stop());
       streamVideoElement.srcObject = null;
       streamVideoOpacity = 0;
     }
   }
-  
+
   function closePC(pc = peerConnection) {
     if (!pc) return;
-    console.log('stopping peer connection');
+    console.log("stopping peer connection");
     pc.close();
-    pc.removeEventListener('icegatheringstatechange', onIceGatheringStateChange, true);
-    pc.removeEventListener('icecandidate', onIceCandidate, true);
-    pc.removeEventListener('iceconnectionstatechange', onIceConnectionStateChange, true);
-    pc.removeEventListener('connectionstatechange', onConnectionStateChange, true);
-    pc.removeEventListener('signalingstatechange', onSignalingStateChange, true);
-    pc.removeEventListener('track', onTrack, true);
-    pcDataChannel.removeEventListener('message', onStreamEvent, true);
-  
+    pc.removeEventListener(
+      "icegatheringstatechange",
+      onIceGatheringStateChange,
+      true
+    );
+    pc.removeEventListener("icecandidate", onIceCandidate, true);
+    pc.removeEventListener(
+      "iceconnectionstatechange",
+      onIceConnectionStateChange,
+      true
+    );
+    pc.removeEventListener(
+      "connectionstatechange",
+      onConnectionStateChange,
+      true
+    );
+    pc.removeEventListener(
+      "signalingstatechange",
+      onSignalingStateChange,
+      true
+    );
+    pc.removeEventListener("track", onTrack, true);
+    pcDataChannel.removeEventListener("message", onStreamEvent, true);
+
     clearInterval(statsIntervalId);
     isStreamReady = !stream_warmup;
     streamVideoOpacity = 0;
-    console.log('stopped peer connection');
+    console.log("stopped peer connection");
     if (pc === peerConnection) {
       peerConnection = null;
     }
@@ -399,19 +418,19 @@ let streamVideoElement
     return new Promise((resolve, reject) => {
       const wsUrl = `${url}?authorization=Basic ${encodeURIComponent(token)}`;
       const ws = new WebSocket(wsUrl);
-  
+
       ws.onopen = () => {
-        console.log('WebSocket connection opened.');
+        console.log("WebSocket connection opened.");
         resolve(ws);
       };
-  
+
       ws.onerror = (err) => {
-        console.error('WebSocket error:', err);
+        console.error("WebSocket error:", err);
         reject(err);
       };
-  
+
       ws.onclose = () => {
-        console.log('WebSocket connection closed.');
+        console.log("WebSocket connection closed.");
       };
     });
   }
@@ -420,30 +439,32 @@ let streamVideoElement
     if (ws.readyState === WebSocket.OPEN) {
       ws.send(JSON.stringify(message));
     } else {
-      console.error('WebSocket is not open. Cannot send message.');
+      console.error("WebSocket is not open. Cannot send message.");
     }
   }
 
-
   return (
-    <>
-    <div id="content">
-      <div id="video-wrapper">
-        <div>
-          <video id="idle-video-element" width="400" height="400" autoPlay loop style={{opacity: 1}}></video>
-          <video id="stream-video-element" width="400" height="400" autoPlay style={{opacity: 0}}></video>
-        </div>
+    <div className="AgentContainer">
+      <div id="content">
+          <video
+            id="idle-video-element"
+            src={emma}
+            width="100%"
+            height="400px"
+            autoPlay
+            loop
+            style={{ opacity: 1 }}
+          ></video>
+          <video
+            id="stream-video-element"
+            width="100%"
+            height="400px"
+            autoPlay
+            style={{ opacity: 0 }}
+          ></video>
       </div>
-      <br />
-
-      <div id="buttons">
-        <button id="stream-word-button" type="button" onClick={streamWord}>Stream word</button>
-        <button id="destroy-button" type="button" onClick={destroyButton}>Destroy</button>
-      </div>
-
+      <script type="module" src="./streaming-client-api-ws.js"></script>
     </div>
-    <script type="module" src="./streaming-client-api-ws.js"></script>
-    </>
   );
 };
 

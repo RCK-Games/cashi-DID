@@ -2,8 +2,7 @@ import { ElementContextRoute } from "./context/RouteContext";
 import React, { useContext } from "react";
 import Login from "./pages/Login"
 import './App.css';
-import StreamingApi from '../src/components/Streaming/StreamingApi';
-
+import Main from "./pages/Main";
 function App() {
   const {route} = useContext(ElementContextRoute);
 
@@ -23,7 +22,7 @@ function App() {
 
   return (
     <div className="App">
-      <StreamingApi></StreamingApi>
+      <Main></Main>
       <>{currentPage}</>
       
     </div>

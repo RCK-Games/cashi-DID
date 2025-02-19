@@ -44,9 +44,20 @@
     mask-image: linear-gradient(to bottom, transparent, black 100%, black 20%, transparent);
 }
 
-.AgentContainer {
-  z-index: 0;
+.ChatContainer {
+  z-index: 1;
   top: 0px;
   margin: 0px;
   padding-top: 10px;
+  
+}
+
+.AgentContainer {
+  z-index: 0;
+  top: 1%;
+  margin: 0px;
+  padding: 0px;
+  left: 0;
+  right: 0;
+  position: absolute;
 }

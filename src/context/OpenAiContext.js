@@ -6,14 +6,17 @@ const ElementContextOpenAi = createContext();
 
 const ElementProviderOpenAi= ({ children }) => {
   const [messageList, setMessageList] = useState([]);
+  const [streamWord, setStreamWord] = useState(null);
+  const [finishLoading, setFinishingLoading] = useState(null);
   const [ActiveThreadChecker, setActiveThreadChecker] = useState(null);
   const [ActiveThreadTalker, setActiveThreadTalker] = useState(null);
   const open_ia_key = '';
-    const assistantIdChecker = "asst_zrSOh8NUnr9XkoSAcZOkFP8d";
-    const assistantIdTalker = "asst_zrSOh8NUnr9XkoSAcZOkFP8d";
+    const assistantIdChecker = "asst_49xk6o2iqWv6WreQfU0Cf0v3";
+    const assistantIdTalker = "asst_63tzfPzsH6SVUp5wtwoMtItf";
 
 
 const OpenAiInterface = async (messageContent) =>{
+	setFinishingLoading(false)
     let _activeThreadChecker = ActiveThreadChecker
     if(_activeThreadChecker === null){
         _activeThreadChecker = await handleNewThread(true)
@@ -26,9 +29,13 @@ const OpenAiInterface = async (messageContent) =>{
             _activeThreadTalker = await handleNewThread(false)
         }
         const AiCheckerResponseTalker = await handleThreadInterface(messageContent, _activeThreadTalker, false)
+		setStreamWord(AiCheckerResponseChecker)
+		setFinishingLoading(true)
         return AiCheckerResponseTalker
     }else{
         //Idk
+		setFinishingLoading(true)
+		setStreamWord(null)
         return null
     }
 
@@ -201,7 +208,7 @@ const fetchMessages = async (activeThread, isChecker) => {
 }
 
 return (
-    <ElementContextOpenAi.Provider value={{ messageList, handleMessageToThread, OpenAiInterface }}>
+    <ElementContextOpenAi.Provider value={{ messageList, OpenAiInterface, streamWord, finishLoading }}>
       {children}
     </ElementContextOpenAi.Provider>
   );
