@@ -23,7 +23,7 @@ const OpenAiInterface = async (messageContent) =>{
     }
     const AiCheckerResponseChecker = await handleThreadInterface(messageContent, _activeThreadChecker, true)
 
-    if(AiCheckerResponseChecker === "True"){
+    if(AiCheckerResponseChecker === "yes"){
         let _activeThreadTalker = ActiveThreadTalker
         if(_activeThreadTalker === null){
             _activeThreadTalker = await handleNewThread(false)
