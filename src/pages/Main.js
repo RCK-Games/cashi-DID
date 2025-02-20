@@ -16,10 +16,11 @@ import { ElementContextOpenAi } from "../context/OpenAiContext";
 import { ElementContextRoute } from "../context/RouteContext";
 function Main() {
   const [show, setShow] = useState(false);
-  const [firstMessageSend, setFirstMessageSend] = useState(false);
+  //DEMO
+  const [firstMessageSend, setFirstMessageSend] = useState(true);
   const inputRef = useRef(null);
 
-  const { messageList, OpenAiInterface, finishLoading } = useContext(ElementContextOpenAi);
+  const { messageList, OpenAiInterface, finishLoading, AddLocalMessage } = useContext(ElementContextOpenAi);
   const {id} = useContext(ElementContextRoute);
   
   const handleClose = () => {
@@ -30,6 +31,7 @@ function Main() {
     setShow(true);
   };
   const chat = () => {
+    console.log(finishLoading)
     if(!finishLoading){
       return
     }
@@ -52,6 +54,7 @@ function Main() {
       setFirstMessageSend(true)
     }
     if (inputRef.current.value !== "") {
+      AddLocalMessage(inputRef.current.value)
       OpenAiInterface(inputRef.current.value)
       inputRef.current.value = ""
     }

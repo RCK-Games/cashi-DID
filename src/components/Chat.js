@@ -1,18 +1,26 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useContext } from "react";
 import "../styles/Chat.css";
-
+import { ElementContextOpenAi } from "../context/OpenAiContext";
 const Chat = ({ messages }) => {
   const lastMessageRef = useRef(null);
-
+  
+  const { finishLoading } = useContext(ElementContextOpenAi);
   useEffect(() => {
     if (lastMessageRef.current) {
       lastMessageRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
+
   if (messages == null || messages === undefined) {
-    return <></>;
+    return <>
+    </>;
   }
 
+  function formatBoldText(input) {
+    return input.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+}
+
+  console.log(messages);
   return (
     <div className="chatContainerParent">
       <div className="chat-container">
@@ -25,9 +33,17 @@ const Chat = ({ messages }) => {
               message.role === "assistant" ? "assistant" : "user"
             }`}
           >
-            {message.content}
+            <p> { formatBoldText(message.content[0].value)}</p>
           </div>
+          
         ))}
+        {finishLoading ? null : <div
+        className="message assistant"
+        style={{width: "60px"}}
+        >
+          <div className="lds-ellipsis"><div></div><div></div><div></div></div>
+        </div>}
+        
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { useEffect, useContext } from "react";
+import { useEffect, useContext, useState } from "react";
 import "../../styles/Streaming.css";
 import emma from "../Streaming/emma_idle.mp4";
 import { ElementContextOpenAi } from "../../context/OpenAiContext";
@@ -9,7 +9,7 @@ const StreamingApi = () => {
     key: "Y2FzaGltaXJvLmFpQGdtYWlsLmNvbQ:rIjOUHjgu67IHsFNURkAH",
     url: "https://api.d-id.com",
     websocketUrl: "wss://ws-api.d-id.com",
-    service: "clips",
+    service: "talks",
   };
   let peerConnection;
   let pcDataChannel;
@@ -22,8 +22,7 @@ const StreamingApi = () => {
   let videoIsPlaying = false;
   let streamVideoOpacity = 0;
 
-  let ws;
-
+  const [ws, setWs] = useState(null);
   const stream_warmup = true;
   let isStreamReady = !stream_warmup;
 
@@ -41,10 +40,13 @@ const StreamingApi = () => {
   }, []);
 
   useEffect(() => {
+    console.log(streamWord)
     if (streamWord !== null) {
       sendWordToServer(streamWord);
     }
   }, [streamWord]);
+
+  
 
   const presenterInputByService = {
     talks: {
@@ -62,21 +64,30 @@ const StreamingApi = () => {
     if (DID_API.key === "🤫")
       alert("Please put your api key inside ./api.json and restart..");
     PRESENTER_TYPE = DID_API.service === "clips" ? "clip" : "talk";
-    await makeConnection();
-  };
-
-  const makeConnection = async () => {
     if (peerConnection && peerConnection.connectionState === "connected") {
       return;
     }
 
     stopAllStreams();
     closePC();
+    try{
+      const _ws = await connectToWebSocket(DID_API.websocketUrl, DID_API.key)
+      await setWs(_ws)
+    }catch(e)
+    {
+      console.error("Failed to connect", e.type);
+    }
+  };
 
+  useEffect(() => {
+    console.log(ws)
+    if (streamWord !== null) {
+      makeConnection();
+    }
+  }, [ws]);
+
+  const makeConnection = async () => {
     try {
-      // Step 1: Connect to WebSocket
-      ws = await connectToWebSocket(DID_API.websocketUrl, DID_API.key);
-
       // Step 2: Send "init-stream" message to WebSocket
       const startStreamMessage = {
         type: "init-stream",
@@ -140,10 +151,9 @@ const StreamingApi = () => {
   };
 
   ///Accionar cuando se llame el sistema para hablar
-  const sendWordToServer = async () => {
-    console.log("streamWord");
-    const text =
-      'This is an example of the WebSocket streaming API <break time="1.5s" /> Making videos is easy with D-ID';
+  const sendWordToServer = async (_word) => {
+    console.log(_word);
+    const text =_word;
     const chunks = text.split(" ");
 
     // Indicates end of text stream
@@ -177,6 +187,7 @@ const StreamingApi = () => {
           presenter_type: PRESENTER_TYPE,
         },
       };
+      console.log(ws)
       sendMessage(ws, streamMessage);
     }
   };
@@ -219,6 +230,13 @@ const StreamingApi = () => {
   function onConnectionStateChange() {
     // not supported in firefox
     console.log("peerConnection", peerConnection.connectionState);
+    if (peerConnection.connectionState === "failed") {
+      init()
+    }
+
+    if(peerConnection === null){
+      return
+    }
 
     if (peerConnection.connectionState === "connected") {
       /**
@@ -260,22 +278,32 @@ const StreamingApi = () => {
 
     if (!event.track) return;
 
-    statsIntervalId = setInterval(async () => {
-      const stats = await peerConnection.getStats(event.track);
-      stats.forEach((report) => {
-        if (report.type === "inbound-rtp" && report.kind === "video") {
-          // eslint-disable-next-line no-mixed-operators
-          const videoStatusChanged =
-            videoIsPlaying !== report.bytesReceived > lastBytesReceived;
-
-          if (videoStatusChanged) {
-            videoIsPlaying = report.bytesReceived > lastBytesReceived;
-            onVideoStatusChange(videoIsPlaying, event.streams[0]);
-          }
-          lastBytesReceived = report.bytesReceived;
+    try{
+      statsIntervalId = setInterval(async () => {
+        console.log("Interval")
+        if(peerConnection === null){
+          return
         }
-      });
-    }, 500);
+        const stats = await peerConnection.getStats(event.track);
+        console.log(stats)
+        stats.forEach((report) => {
+          if (report.type === "inbound-rtp" && report.kind === "video") {
+            // eslint-disable-next-line no-mixed-operators
+            const videoStatusChanged =
+              videoIsPlaying !== report.bytesReceived > lastBytesReceived;
+  
+            if (videoStatusChanged) {
+              videoIsPlaying = report.bytesReceived > lastBytesReceived;
+              onVideoStatusChange(videoIsPlaying, event.streams[0]);
+            }
+            lastBytesReceived = report.bytesReceived;
+          }
+        });
+      }, 500);
+    }catch(e){
+      
+    }
+
   }
 
   function onStreamEvent(message) {
