@@ -1,5 +1,5 @@
 
-import { useEffect} from 'react';
+import { useEffect, useState, useRef} from 'react';
 import '../../styles/Streaming.css';
 
 const StreamingApi = () => {
@@ -21,8 +21,9 @@ let lastBytesReceived;
 let videoIsPlaying = false;
 let streamVideoOpacity = 0;
 
-let ws;
+let ws = useRef(null);
 
+const [word, setWord] = useState(null);
 const stream_warmup = true;
 let isStreamReady = !stream_warmup;
 
@@ -69,7 +70,6 @@ let streamVideoElement
   try {
     // Step 1: Connect to WebSocket
     ws = await connectToWebSocket(DID_API.websocketUrl, DID_API.key);
-
     // Step 2: Send "init-stream" message to WebSocket
     const startStreamMessage = {
       type: 'init-stream',
@@ -125,8 +125,12 @@ let streamVideoElement
 
 
   ///Accionar cuando se llame el sistema para hablar
-  const streamWord = async ()=>{const text =
-    'This is an example of the WebSocket streaming API <break time="1.5s" /> Making videos is easy with D-ID';
+  const streamWord = async ()=>{
+    let text = word
+    if(word === null){
+      text = "hello world one two three"
+    }
+    
   const chunks = text.split(' ');
 
   // Indicates end of text stream
@@ -162,6 +166,13 @@ let streamVideoElement
     };
     sendMessage(ws, streamMessage);
   }}
+  console.log(word)
+  
+  const updateButton = async ()=>{
+    console.log(word)
+    setWord("Hello how are you?")
+    console.log(word)
+  };
 
   const destroyButton = async ()=>{const streamMessage = {
     type: 'delete-stream',
@@ -245,7 +256,7 @@ let streamVideoElement
       streamVideoOpacity = 0;
     }
   
-    streamVideoElement.style.opacity = streamVideoOpacity;
+    //streamVideoElement.style.opacity = streamVideoOpacity;
     idleVideoElement.style.opacity = 1 - streamVideoOpacity;
 
   }
@@ -417,6 +428,7 @@ let streamVideoElement
   }
 
   function sendMessage(ws, message) {
+    console.log(ws)
     if (ws.readyState === WebSocket.OPEN) {
       ws.send(JSON.stringify(message));
     } else {
@@ -430,8 +442,8 @@ let streamVideoElement
     <div id="content">
       <div id="video-wrapper">
         <div>
-          <video id="idle-video-element" width="400" height="400" autoPlay loop style={{opacity: 1}}></video>
-          <video id="stream-video-element" width="400" height="400" autoPlay style={{opacity: 0}}></video>
+          <video id="idle-video-element" width="400" height="400" autoPlay loop style={{opacity: 0}}></video>
+          <video id="stream-video-element" width="400" height="400" autoPlay style={{opacity: 1}}></video>
         </div>
       </div>
       <br />
@@ -439,6 +451,7 @@ let streamVideoElement
       <div id="buttons">
         <button id="stream-word-button" type="button" onClick={streamWord}>Stream word</button>
         <button id="destroy-button" type="button" onClick={destroyButton}>Destroy</button>
+        <button id="update-button" type="button" onClick={updateButton}>Update</button>
       </div>
 
     </div>
