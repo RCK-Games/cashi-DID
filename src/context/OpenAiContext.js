@@ -10,7 +10,7 @@ const ElementProviderOpenAi= ({ children }) => {
   const [finishLoading, setFinishingLoading] = useState(true);
   const [ActiveThreadChecker, setActiveThreadChecker] = useState(null);
   const [ActiveThreadTalker, setActiveThreadTalker] = useState(null);
-  const open_ia_key = '';
+  const open_ia_key = ""
     const assistantIdChecker = "asst_onLekF0vx17eQmwlxX3LcOhp";
     const assistantIdTalker = "asst_63tzfPzsH6SVUp5wtwoMtItf";
 
@@ -102,13 +102,17 @@ const handleThreadInterface = async (messageContent, openThread, isChecker) =>{
 			'Timeout in fetchMessages'
 		)
 		if(isChecker === false){
-            AddAssistantMessage(response.data[0].content[0].text.value)
+            AddAssistantMessage(removeSource(response.data[0].content[0].text.value))
         }
 		return response.data[0].content[0].text.value.toLowerCase()
 	}catch(e){
 		return null
 	}
     
+}
+
+function removeSource(text) {
+    return text.replace(/【\d+:\d+\†source】/g, '');
 }
 
 function promiseWithTimeout(promise, timeout = 5000, errorMessage = 'Operation took to long') {

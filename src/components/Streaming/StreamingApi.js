@@ -81,7 +81,7 @@ const StreamingApi = () => {
 
   useEffect(() => {
     console.log(ws)
-    if (streamWord !== null) {
+    if (ws !== null) {
       makeConnection();
     }
   }, [ws]);
@@ -280,8 +280,11 @@ const StreamingApi = () => {
 
     try{
       statsIntervalId = setInterval(async () => {
-        console.log("Interval")
+        console.log("Interval" + peerConnection)
+
         if(peerConnection === null){
+          console.log("Clear?")
+          clearInterval(statsIntervalId)
           return
         }
         const stats = await peerConnection.getStats(event.track);
@@ -301,7 +304,7 @@ const StreamingApi = () => {
         });
       }, 500);
     }catch(e){
-      
+      console.log("Crashed: " + e.message)
     }
 
   }
