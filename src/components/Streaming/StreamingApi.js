@@ -1,9 +1,9 @@
 
-import { useEffect, useState, useRef} from 'react';
+import { useEffect, useRef, useImperativeHandle, forwardRef, useContext} from 'react';
 import '../../styles/Streaming.css';
-
-const StreamingApi = () => {
-
+import { ElementContextOpenAi } from "../../context/OpenAiContext";
+const StreamingApi = forwardRef((props, ref) =>  {
+  const { lastMessage } = useContext(ElementContextOpenAi);
 const DID_API = {
   "key": "Y2FzaGltaXJvLmFpQGdtYWlsLmNvbQ:rIjOUHjgu67IHsFNURkAH",
   "url": "https://api.d-id.com",
@@ -23,7 +23,6 @@ let streamVideoOpacity = 0;
 
 let ws = useRef(null);
 
-const [word, setWord] = useState(null);
 const stream_warmup = true;
 let isStreamReady = !stream_warmup;
 
@@ -124,11 +123,23 @@ let streamVideoElement
   }}
 
 
+  useImperativeHandle(ref, () => ({
+    streamWord,
+  }));
+
   ///Accionar cuando se llame el sistema para hablar
   const streamWord = async ()=>{
-    let text = word
-    if(word === null){
-      text = "hello world one two three"
+    let wordToStream
+    const paragraph = document.getElementById("textHolder");
+    if (paragraph) {
+      wordToStream = paragraph.textContent;
+    }
+    console.log(wordToStream)
+    let text
+    if(wordToStream === undefined || wordToStream === null){
+      text = "Hello world"
+    }else{
+      text = wordToStream
     }
     
   const chunks = text.split(' ');
@@ -166,13 +177,6 @@ let streamVideoElement
     };
     sendMessage(ws, streamMessage);
   }}
-  console.log(word)
-  
-  const updateButton = async ()=>{
-    console.log(word)
-    setWord("Hello how are you?")
-    console.log(word)
-  };
 
   const destroyButton = async ()=>{const streamMessage = {
     type: 'delete-stream',
@@ -451,13 +455,12 @@ let streamVideoElement
       <div id="buttons">
         <button id="stream-word-button" type="button" onClick={streamWord}>Stream word</button>
         <button id="destroy-button" type="button" onClick={destroyButton}>Destroy</button>
-        <button id="update-button" type="button" onClick={updateButton}>Update</button>
       </div>
 
     </div>
     <script type="module" src="./streaming-client-api-ws.js"></script>
     </>
   );
-};
+});
 
 export default StreamingApi;

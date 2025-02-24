@@ -8,6 +8,7 @@ const ElementProviderOpenAi= ({ children }) => {
   const [messageList, setMessageList] = useState([]);
   const [ActiveThreadChecker, setActiveThreadChecker] = useState(null);
   const [ActiveThreadTalker, setActiveThreadTalker] = useState(null);
+  const [lastMessage, setLastMessage] = useState(null);
   const open_ia_key = '';
     const assistantIdChecker = "asst_zrSOh8NUnr9XkoSAcZOkFP8d";
     const assistantIdTalker = "asst_zrSOh8NUnr9XkoSAcZOkFP8d";
@@ -201,7 +202,7 @@ const fetchMessages = async (activeThread, isChecker) => {
 }
 
 return (
-    <ElementContextOpenAi.Provider value={{ messageList, handleMessageToThread, OpenAiInterface }}>
+    <ElementContextOpenAi.Provider value={{ messageList, handleMessageToThread, OpenAiInterface, lastMessage, setLastMessage }}>
       {children}
     </ElementContextOpenAi.Provider>
   );
