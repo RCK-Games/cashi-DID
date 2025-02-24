@@ -16,10 +16,15 @@ const Chat = ({ messages }) => {
     </>;
   }
 
+
   function formatBoldText(input) {
-    return input.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+    return input
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 }
 
+function formatTextWithBreaks(text) {
+  return text.replace(/(\d+\.\s)/g, '<br>$1').trim();
+}
   console.log(messages);
   return (
     <div className="chatContainerParent">
@@ -33,7 +38,8 @@ const Chat = ({ messages }) => {
               message.role === "assistant" ? "assistant" : "user"
             }`}
           >
-            <p> { formatBoldText(message.content[0].value)}</p>
+            <p style={{boxSizing: "border-box", margin: "0px", padding: "0px"}} dangerouslySetInnerHTML={{ __html: formatTextWithBreaks(formatBoldText(message.content[0].value)) }} />
+            
           </div>
           
         ))}
