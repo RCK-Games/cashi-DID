@@ -1,28 +1,37 @@
 import "../styles/Login.css";
-
+import "../styles/Chat.css";
+import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useState, useEffect, useRef, useContext } from "react";
-
+import Holder from "../components/Holder";
 import logo from "../img/Brand_Cashi.png";
 import icon from "../img/Icon_send.png";
 import iconMenu from "../img/Icon_Menu.png";
 import url from "../img/Icon_URL_circle.png";
 
 import { Offcanvas } from "react-bootstrap";
-import Chat from "../components/Chat";
 
-import "bootstrap/dist/css/bootstrap.min.css";
-import StreamingApi from "../components/Streaming/StreamingApi";
 import { ElementContextOpenAi } from "../context/OpenAiContext";
 import { ElementContextRoute } from "../context/RouteContext";
+
 function Main() {
   const [show, setShow] = useState(false);
   //DEMO
   const [firstMessageSend, setFirstMessageSend] = useState(true);
   const inputRef = useRef(null);
 
-  const { messageList, OpenAiInterface, finishLoading, AddLocalMessage } = useContext(ElementContextOpenAi);
+  const { OpenAiInterface, finishLoading, AddLocalMessage, messageList } = useContext(ElementContextOpenAi);
   const {id} = useContext(ElementContextRoute);
   
+  const lastMessageRef = useRef(null);
+
+
+  useEffect(() => {
+    console.log("MessageHolder")
+    if (lastMessageRef.current) {
+      lastMessageRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [finishLoading]);
+
   const handleClose = () => {
     setShow(false);
   };
@@ -30,7 +39,16 @@ function Main() {
     console.log("show");
     setShow(true);
   };
-  const chat = () => {
+
+  function formatBoldText(input) {
+    return input.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+  }
+
+  function formatTextWithBreaks(text) {
+    return text.replace(/(\d+\.\s)/g, "<br>$1").trim();
+  }
+
+  const chat = async () => {
     console.log(finishLoading)
     if(!finishLoading){
       return
@@ -54,17 +72,29 @@ function Main() {
       setFirstMessageSend(true)
     }
     if (inputRef.current.value !== "") {
-      AddLocalMessage(inputRef.current.value)
-      OpenAiInterface(inputRef.current.value)
+      const messageHolder = inputRef.current.value
       inputRef.current.value = ""
+
+      
+      await AddLocalMessage(messageHolder)
+      console.log("waiting")
+      await OpenAiInterface(messageHolder)
+      console.log("done")
+      
+
     }
     
     console.log("Send Chat");
   };
 
+
+  if (lastMessageRef.current) {
+    lastMessageRef.current.scrollIntoView({ behavior: "smooth" });
+  }
+
   return (
     <>
-      <StreamingApi className="AgentContainer"></StreamingApi>
+      
       <div className="ChatContainer" id="container">
         <div id="header" className="header">
           <img
@@ -82,13 +112,51 @@ function Main() {
           <div className="header-separator"></div>
         </div>
 
-        <Chat messages={messageList}></Chat>
+        <div className="chatContainerParent">
+      <Holder></Holder>
+      <div className="chat-container">
+        <div className="spacer"></div>
+
+      {messageList.length === 0 ? <></> : (<>
+        {messageList.current.map((message, index) => (
+          <div
+            key={index}
+            ref={index === messageList.length - 1 ? lastMessageRef : null}
+            className={`message ${
+              message.role === "assistant" ? "assistant" : "user"
+            }`}
+          >
+            <p
+              style={{ boxSizing: "border-box", margin: "0px", padding: "0px" }}
+              dangerouslySetInnerHTML={{
+                __html: formatTextWithBreaks(
+                  formatBoldText(message.content[0].value)
+                ),
+              }}
+            />
+          </div>
+        ))}
+      </>)}
+
+
+        {finishLoading ? null : (
+          <div className="message assistant" style={{ width: "60px" }}>
+            <div className="lds-ellipsis">
+              <div></div>
+              <div></div>
+              <div></div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
         <div className="inputsDiv">
           <textarea
             ref={inputRef}
             id="textArea"
             placeholder="Envía un mensaje a Cashimiro"
             autoFocus
+            style={{textAlign: "left"}}
           ></textarea>
           <button
             className="sendButton"

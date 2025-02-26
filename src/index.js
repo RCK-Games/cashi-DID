@@ -4,14 +4,14 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { ElementProviderRoute } from './context/RouteContext';
-import { ElementProviderOpenAi } from './context/OpenAiContext';
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <ElementProviderOpenAi>
+
       <ElementProviderRoute>
         <App />
     </ElementProviderRoute>
-  </ElementProviderOpenAi>
+
 
 );
 

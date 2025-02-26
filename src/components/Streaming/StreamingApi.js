@@ -1,9 +1,7 @@
-import { useEffect, useContext, useState } from "react";
+import { useEffect, useRef } from "react";
 import "../../styles/Streaming.css";
 import emma from "../Streaming/emma_idle.mp4";
-import { ElementContextOpenAi } from "../../context/OpenAiContext";
 const StreamingApi = () => {
-  const { streamWord } = useContext(ElementContextOpenAi);
 
   const DID_API = {
     key: "Y2FzaGltaXJvLmFpQGdtYWlsLmNvbQ:rIjOUHjgu67IHsFNURkAH",
@@ -21,14 +19,13 @@ const StreamingApi = () => {
   let lastBytesReceived;
   let videoIsPlaying = false;
   let streamVideoOpacity = 0;
-
-  const [ws, setWs] = useState(null);
+  let ws = useRef(null)
   const stream_warmup = true;
   let isStreamReady = !stream_warmup;
 
   let idleVideoElement;
   let streamVideoElement;
-
+  console.log("render api")
   useEffect(() => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     idleVideoElement = document.getElementById("idle-video-element");
@@ -39,14 +36,6 @@ const StreamingApi = () => {
     init();
   }, []);
 
-  useEffect(() => {
-    console.log(streamWord)
-    if (streamWord !== null) {
-      sendWordToServer(streamWord);
-    }
-  }, [streamWord]);
-
-  
 
   const presenterInputByService = {
     talks: {
@@ -67,27 +56,15 @@ const StreamingApi = () => {
     if (peerConnection && peerConnection.connectionState === "connected") {
       return;
     }
-
-    stopAllStreams();
-    closePC();
-    try{
-      const _ws = await connectToWebSocket(DID_API.websocketUrl, DID_API.key)
-      await setWs(_ws)
-    }catch(e)
-    {
-      console.error("Failed to connect", e.type);
-    }
+    makeConnection()
   };
-
-  useEffect(() => {
-    console.log(ws)
-    if (ws !== null) {
-      makeConnection();
-    }
-  }, [ws]);
 
   const makeConnection = async () => {
     try {
+      stopAllStreams();
+      closePC();
+
+      ws = await connectToWebSocket(DID_API.websocketUrl, DID_API.key)
       // Step 2: Send "init-stream" message to WebSocket
       const startStreamMessage = {
         type: "init-stream",
@@ -151,9 +128,20 @@ const StreamingApi = () => {
   };
 
   ///Accionar cuando se llame el sistema para hablar
-  const sendWordToServer = async (_word) => {
-    console.log(_word);
-    const text =_word;
+  const sendWordToServer = async () => {
+    let wordToStream
+    const paragraph = document.getElementById("textHolder");
+    if (paragraph) {
+      wordToStream = paragraph.textContent;
+    }
+    console.log(wordToStream)
+    let text
+    if(wordToStream === undefined || wordToStream === null){
+      text = "Hello world"
+    }else{
+      text = wordToStream
+    }
+    
     const chunks = text.split(" ");
 
     // Indicates end of text stream
@@ -280,28 +268,32 @@ const StreamingApi = () => {
 
     try{
       statsIntervalId = setInterval(async () => {
-        console.log("Interval" + peerConnection)
 
         if(peerConnection === null){
-          console.log("Clear?")
           clearInterval(statsIntervalId)
           return
         }
-        const stats = await peerConnection.getStats(event.track);
-        console.log(stats)
-        stats.forEach((report) => {
-          if (report.type === "inbound-rtp" && report.kind === "video") {
-            // eslint-disable-next-line no-mixed-operators
-            const videoStatusChanged =
-              videoIsPlaying !== report.bytesReceived > lastBytesReceived;
-  
-            if (videoStatusChanged) {
-              videoIsPlaying = report.bytesReceived > lastBytesReceived;
-              onVideoStatusChange(videoIsPlaying, event.streams[0]);
+        try{
+          const stats = await peerConnection.getStats(event.track);
+          stats.forEach((report) => {
+            if (report.type === "inbound-rtp" && report.kind === "video") {
+              // eslint-disable-next-line no-mixed-operators
+              const videoStatusChanged =
+                videoIsPlaying !== report.bytesReceived > lastBytesReceived;
+    
+              if (videoStatusChanged) {
+                videoIsPlaying = report.bytesReceived > lastBytesReceived;
+                onVideoStatusChange(videoIsPlaying, event.streams[0]);
+              }
+              lastBytesReceived = report.bytesReceived;
             }
-            lastBytesReceived = report.bytesReceived;
-          }
-        });
+          });
+        }catch(e){
+          clearInterval(statsIntervalId)
+          console.log("Crashed: " + e.message)
+        }
+        
+
       }, 500);
     }catch(e){
       console.log("Crashed: " + e.message)
@@ -494,6 +486,7 @@ const StreamingApi = () => {
             style={{ opacity: 0 }}
           ></video>
       </div>
+      <button id="stream-word-button" type="button" style={{height: "0px", padding: "0px", margin: "0px",width: "0px", position: "absolute"}} onClick={sendWordToServer}>Stream word</button>
       <script type="module" src="./streaming-client-api-ws.js"></script>
     </div>
   );
