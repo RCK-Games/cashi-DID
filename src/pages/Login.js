@@ -1,5 +1,5 @@
 import '../styles/Login.css';
-import {useContext, useRef, useState} from "react";
+import {useContext, useRef} from "react";
 import React from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { ElementContextRoute } from "../context/RouteContext";
@@ -40,7 +40,6 @@ function Login (){
                 }).then(data =>{
                     changeRoute("Main")
                     setId(data.id);
-                    console.log(data);
                 })
         }
 

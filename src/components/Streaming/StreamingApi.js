@@ -34,7 +34,7 @@ const StreamingApi = () => {
     idleVideoElement.setAttribute("playsinline", "");
     streamVideoElement.setAttribute("playsinline", "");
     
-    //init();
+    init();
   }, []);
 
 
@@ -384,11 +384,6 @@ const StreamingApi = () => {
         .then((_) => {})
         .catch((e) => {});
     }
-  }
-
-  function playIdleVideo() {
-    idleVideoElement.src =
-      DID_API.service === "clips" ? "alex_v2_idle.mp4" : "emma_idle.mp4";
   }
 
   function stopAllStreams() {

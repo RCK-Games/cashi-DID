@@ -16,7 +16,7 @@ import { ElementContextRoute } from "../context/RouteContext";
 function Main() {
   const [show, setShow] = useState(false);
   //DEMO
-  const firstMessageSend = useRef(null);
+  const firstMessageSend = useRef(false);
   const inputRef = useRef(null);
 
   const { OpenAiInterface, finishLoading, AddLocalMessage, messageList } =
@@ -26,8 +26,6 @@ function Main() {
   const lastMessageRef = useRef(null);
 
   useEffect(() => {
-    console.log("lastMessage");
-    console.log(lastMessageRef.current);
     if (lastMessageRef.current) {
       lastMessageRef.current.scrollIntoView({ behavior: "smooth" });
     }
@@ -52,8 +50,8 @@ function Main() {
     if (!finishLoading) {
       return;
     }
-
-    if (!firstMessageSend) {
+    console.log(firstMessageSend)
+    if (!firstMessageSend.current) {
       const response = fetch(
         "https://cashi.rckgames.com/back/api/v1/conversations/started",
         {
@@ -68,9 +66,11 @@ function Main() {
       ).then((response) => {
         if (!response.ok) {
           throw new Error("Error en el servidor");
+        }else{
+          console.log("Registrado")
         }
       });
-      firstMessageSend = true;
+      firstMessageSend.current = true;
     }
     if (inputRef.current.value !== "") {
       const messageHolder = inputRef.current.value;
@@ -80,8 +80,6 @@ function Main() {
       await OpenAiInterface(messageHolder);
     }
   };
-
-  console.log(lastMessageRef.current);
   if (lastMessageRef.current) {
     lastMessageRef.current.scrollIntoView({ behavior: "smooth" });
   }
@@ -99,7 +97,7 @@ function Main() {
           <span id="previewName" className="header-item center">
             Asegúrate de activar tu audio
           </span>
-          <img src={logo} className="header-item right" />
+          <img src={logo} alt="logo" className="header-item right" />
         </div>
         <div className="parent-container">
           <div className="header-separator"></div>
@@ -110,7 +108,7 @@ function Main() {
           <div className="chat-container">
             <div className="spacer"></div>
 
-            {messageList.length === 0 ? (
+            {messageList.current.length === 0 ? (
               <></>
             ) : (
               <>
@@ -118,7 +116,7 @@ function Main() {
                   <div
                     key={index}
                     ref={
-                      index === messageList.length - 1 ? lastMessageRef : null
+                      index === messageList.current.length - 1 ? lastMessageRef : null
                     }
                     className={`message ${
                       message.role === "assistant" ? "assistant" : "user"
