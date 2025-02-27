@@ -23,7 +23,6 @@ const OpenAiInterface = async (messageContent) =>{
         _activeThreadChecker = await handleNewThread(true)
     }
     const AiCheckerResponseChecker = await handleThreadInterface(messageContent, _activeThreadChecker, true)
-	console.log(AiCheckerResponseChecker)
 	if(AiCheckerResponseChecker === null){
 		AddAssistantMessage("Error en Tiempo de Espera")
 		setFinishLoading(true)
@@ -36,7 +35,6 @@ const OpenAiInterface = async (messageContent) =>{
             _activeThreadTalker = await handleNewThread(false)
         }
         const AiCheckerResponseTalker = removeSource(await handleThreadInterface(messageContent, _activeThreadTalker, false))
-		console.log(AiCheckerResponseTalker)
 		if(AiCheckerResponseTalker === null){
 			AddAssistantMessage("Error en Tiempo de Espera")
 			setFinishLoading(true)
@@ -60,7 +58,7 @@ const OpenAiInterface = async (messageContent) =>{
 const triggerApi = (_value) =>{
 	const paragraph = document.getElementById("textHolder");
 	if (paragraph) {
-		paragraph.textContent = _value;
+		paragraph.textContent = removeAsterisks(_value);
 	}
 
 const button = document.getElementById("stream-word-button");
@@ -82,7 +80,7 @@ const AddAssistantMessage = (_value) =>{
 		role: "assistant"
 	})
 	messageList.current.push(newMessage)
-	console.log(messageList)
+
 }
 
 const AddLocalMessage = (_value) =>{
@@ -108,20 +106,20 @@ const handleThreadInterface = async (messageContent, openThread, isChecker) =>{
 			10000,
 			'Timeout in handleMessageToThread'
 		)
-		console.log("a")
+
 		let data = await promiseWithTimeout(handleRun(openThread, isChecker), 30000, 'Timeout en handleRun')
 		await promiseWithTimeout(
 			checkRunStatus(data.id, openThread),
 			30000,
 			'Timeout in checkRunStatus'
 		)
-		console.log("a")
+
 		let response = await promiseWithTimeout(
 			fetchMessages(openThread, isChecker),
 			20000,
 			'Timeout in fetchMessages'
 		)
-		console.log("a")
+
 		if(isChecker === false){
             AddAssistantMessage(removeSource(response.data[0].content[0].text.value))
         }
@@ -130,6 +128,10 @@ const handleThreadInterface = async (messageContent, openThread, isChecker) =>{
 		return null
 	}
     
+}
+
+function removeAsterisks(text) {
+    return text.replace(/\*\*/g, '');
 }
 
 function removeSource(text) {
@@ -248,7 +250,6 @@ const checkRunStatus = async (runId, activeThread) => {
 			)
 
 			const data = await response.json()
-			console.log(data.status)
 			if (data.status === 'completed') {
 				return data
 			}

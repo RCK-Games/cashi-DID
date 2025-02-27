@@ -56,9 +56,10 @@
 .AgentContainer {
   z-index: 0;
   top: 0px;
-  height: 60vh;
+  height: 80vh;
   margin: 0px;
   padding: 0px;
+  top: 80px;
   left: 0;
   right: 0;
   position: absolute;

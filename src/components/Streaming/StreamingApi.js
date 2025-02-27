@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import "../../styles/Streaming.css";
-import emma from "../Streaming/emma_idle.mp4";
+import emma from "../Streaming/cashimiro_idle.mp4"
 const StreamingApi = () => {
 
   const DID_API = {
@@ -25,7 +25,7 @@ const StreamingApi = () => {
 
   let idleVideoElement;
   let streamVideoElement;
-  console.log("render api")
+  console.log("Streaming API INIT")
   useEffect(() => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     idleVideoElement = document.getElementById("idle-video-element");
@@ -33,14 +33,15 @@ const StreamingApi = () => {
     streamVideoElement = document.getElementById("stream-video-element");
     idleVideoElement.setAttribute("playsinline", "");
     streamVideoElement.setAttribute("playsinline", "");
-    init();
+    
+    //init();
   }, []);
 
 
   const presenterInputByService = {
     talks: {
       source_url:
-        "https://create-images-results.d-id.com/DefaultPresenters/Emma_f/v1_image.jpeg",
+        "https://raw.githubusercontent.com/RCK-Games/rckbd/refs/heads/main/cashimiro__2_.png?token=GHSAT0AAAAAAC5T3ZTHXGA3UJQANT6OMDR2Z57XUPQ",
     },
     clips: {
       presenter_id: "v2_public_alex@qcvo4gupoy",
@@ -60,6 +61,7 @@ const StreamingApi = () => {
   };
 
   const makeConnection = async () => {
+    console.log("CONNECTION INIT")
     try {
       stopAllStreams();
       closePC();
@@ -134,7 +136,6 @@ const StreamingApi = () => {
     if (paragraph) {
       wordToStream = paragraph.textContent;
     }
-    console.log(wordToStream)
     let text
     if(wordToStream === undefined || wordToStream === null){
       text = "Hello world"
@@ -157,7 +158,7 @@ const StreamingApi = () => {
             input: chunk,
             provider: {
               type: "microsoft",
-              voice_id: "en-US-JennyNeural ",
+              voice_id: "es-MX-JorgeNeural",
             },
             ssml: true,
           },
@@ -175,7 +176,6 @@ const StreamingApi = () => {
           presenter_type: PRESENTER_TYPE,
         },
       };
-      console.log(ws)
       sendMessage(ws, streamMessage);
     }
   };
@@ -469,25 +469,23 @@ const StreamingApi = () => {
   return (
     <div className="AgentContainer">
       <div id="content">
+        
           <video
             id="idle-video-element"
-            src={emma}
-            width="100%"
-            height="400px"
             autoPlay
+            muted
             loop
+            className="videoElementContainer"
             style={{ opacity: 1 }}
-          ></video>
+          ><source src={emma}  type="video/mp4" /></video>
           <video
             id="stream-video-element"
-            width="100%"
-            height="400px"
             autoPlay
+            className="videoElementContainer"
             style={{ opacity: 0 }}
           ></video>
       </div>
       <button id="stream-word-button" type="button" style={{height: "0px", padding: "0px", margin: "0px",width: "0px", position: "absolute"}} onClick={sendWordToServer}>Stream word</button>
-      <script type="module" src="./streaming-client-api-ws.js"></script>
     </div>
   );
 };

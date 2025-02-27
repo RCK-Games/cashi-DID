@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import "./App.css";
 import StreamingApi from "./components/Streaming/StreamingApi";
 import MainPageHandler from "./pages/MainPageHandler";
+import emma from "../src/components/Streaming/cashimiro_idle.mp4";
 function App() {
   const { route } = useContext(ElementContextRoute);
 
@@ -23,8 +24,8 @@ function App() {
 
   return (
     <div className="App">
-      <MainPageHandler></MainPageHandler>
       <>{currentPage}</>
+      <MainPageHandler></MainPageHandler>
     </div>
   );
 }
