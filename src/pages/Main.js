@@ -16,7 +16,7 @@ import { ElementContextRoute } from "../context/RouteContext";
 function Main() {
   const [show, setShow] = useState(false);
   //DEMO
-  const firstMessageSend = useRef(false);
+  const firstMessageSend = useRef(true);
   const inputRef = useRef(null);
 
   const { OpenAiInterface, finishLoading, AddLocalMessage, messageList } =

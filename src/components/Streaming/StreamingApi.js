@@ -41,7 +41,7 @@ const StreamingApi = () => {
   const presenterInputByService = {
     talks: {
       source_url:
-        "https://raw.githubusercontent.com/RCK-Games/rckbd/refs/heads/main/cashimiro__2_.png?token=GHSAT0AAAAAAC5T3ZTHLMHZHQ5HB6JGZ6DCZ6ATRTQ",
+        "https://raw.githubusercontent.com/RCK-Games/rckbd/refs/heads/main/cashimiro__2_.png?token=GHSAT0AAAAAAC5T3ZTHHJS5OLPOWBQLIZSEZ6IWQWA",
     },
     clips: {
       presenter_id: "v2_public_alex@qcvo4gupoy",

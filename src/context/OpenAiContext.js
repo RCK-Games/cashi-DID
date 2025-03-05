@@ -2,6 +2,7 @@ import OpenAI from "openai"
 import { DataAPIClient } from "@datastax/astra-db-ts"
 
 import React, { createContext, useRef, useState } from "react";
+import { interfaceRag } from "./RagInterface.ts";
 
 const ElementContextOpenAi = createContext();
 
@@ -10,9 +11,12 @@ const ElementProviderOpenAi = ({ children }) => {
   const [finishLoading, setFinishLoading] = useState(true);
   const [agentVideo, setAgentVideo] = useState(null);
   const ActiveThreadChecker = useRef(null);
+  const initTimer = useRef(null);
+  const endTimer = useRef(null);
   const ActiveThreadTalker = useRef(null);
+  const timer = useRef(null);
   const open_ia_key = process.env.REACT_APP_OPENAI_API_KEY
-  const assistantIdChecker = "asst_onLekF0vx17eQmwlxX3LcOhp";
+  const assistantIdChecker = "asst_rIxnJR3uiCjMMIv599ibKFeW";
   const assistantIdTalker = "asst_63tzfPzsH6SVUp5wtwoMtItf";
 
 	console.log(process.env.REACT_APP_ASTRA_DB_API_ENPOINT, process.env.REACT_APP_ASTRA_DB_NAMESPACE)
@@ -23,6 +27,8 @@ const ElementProviderOpenAi = ({ children }) => {
 
   const openai = new OpenAI({ apiKey: open_ia_key, dangerouslyAllowBrowser: true });
   const OpenAiInterface = async (messageContent) => {
+    timer.current = createTimer();
+    
     const keywords = [
       "Yes.",
       "Yes",
@@ -44,35 +50,50 @@ const ElementProviderOpenAi = ({ children }) => {
       "Sí,",
     ];
     setFinishLoading(false);
-    console.log("Init");
+    console.log("Initialize Defender");
     let _activeThreadChecker = ActiveThreadChecker.current;
     if (_activeThreadChecker === null) {
       _activeThreadChecker = await handleNewThread(true);
     }
-    const AiCheckerResponseChecker = await handleThreadInterface(
+    const AiCheckerResponseChecker = processJsonFile(await handleThreadInterface(
       messageContent,
       _activeThreadChecker,
       true
-    );
+    ));
+
     if (AiCheckerResponseChecker === null) {
+      timer.current.stop(); 
       AddAssistantMessage("Error en Tiempo de Espera");
       setFinishLoading(true);
       return messageList;
     }
+    
+    if (AiCheckerResponseChecker.is_valid) {
 
-    if (keywords.some((word) => AiCheckerResponseChecker.includes(word))) {
-      console.log("Init 2");
+      if(AiCheckerResponseChecker.top_question != null){
+        if(AiCheckerResponseChecker.top_question.is_top_question){
+          timer.current.stop(); 
+          AddAssistantMessage(AiCheckerResponseChecker.top_question.value);
+          setFinishLoading(true);
+          setAgentVideo(AiCheckerResponseChecker.top_question.value);
+          return messageList;
+        }
+      }
+
+      timer.current.start();
+      console.log("Inititilize AI Response");
       let _activeThreadTalker = ActiveThreadTalker.current;
       if (_activeThreadTalker === null) {
         _activeThreadTalker = await handleNewThread(false);
       }
 
-	  messageContent = await triggerRAG(messageContent)
+	    //messageContent = await interfaceRag(messageContent)
 
       const AiCheckerResponseTalker = removeSource(
         await handleThreadInterface(messageContent, _activeThreadTalker, false)
       );
       if (AiCheckerResponseTalker === null) {
+        timer.current.stop(); 
         AddAssistantMessage("Error en Tiempo de Espera");
         setFinishLoading(true);
         return messageList;
@@ -82,11 +103,12 @@ const ElementProviderOpenAi = ({ children }) => {
       if (agentVideo != null) {
         setAgentVideo(null);
       }
-
+      timer.current.stop(); 
       setFinishLoading(true);
       return messageList;
     } else {
       //Idk
+      timer.current.stop(); 
       AddAssistantMessage("Pregunta otra cosa");
       setFinishLoading(true);
       setAgentVideo("");
@@ -106,6 +128,10 @@ const ElementProviderOpenAi = ({ children }) => {
     }
   };
 
+  const useRagInterface = async (value) => {
+    return await interfaceRag(value);
+  }
+
   const triggerRAG = async (_value) => {
 	try{
         let docContext = ""
@@ -116,6 +142,8 @@ const ElementProviderOpenAi = ({ children }) => {
             encoding_format: "float"
         })
 		console.log("embedding")
+    console.log(embedding.data[0].embedding)
+    console.log(embedding.data)
         try{
             const collection = await db.collection(process.env.REACT_APP_ASTRA_DB_COLLECTION)
             const cursor = collection.find(null, {
@@ -124,7 +152,8 @@ const ElementProviderOpenAi = ({ children }) => {
                 },
                 limit: 10
             })
-
+            console.log(cursor)
+            console.log(collection)
             const documents = await cursor.toArray()
 
             const docsMap = documents?.map(doc => doc.text)
@@ -161,6 +190,44 @@ const ElementProviderOpenAi = ({ children }) => {
     }catch (err){
         throw err
     }
+  }
+
+  const processJsonFile = (_value) => {
+    let string
+    if(_value[0] === "`"){
+      console.log(_value)
+      string = _value.split("```json")
+      console.log(string)
+      if(string[1][string[1].length-1] === "`"){
+        return JSON.parse(string[1].slice(0, -3))
+      }
+      return JSON.parse(string[1])
+    }else{
+      return JSON.parse(_value)
+    }
+  }
+
+  const createTimer = () => {
+    initTimer.current = null
+    endTimer.current = null
+  
+    return {
+      start: function () {
+        initTimer.current = performance.now(); // Usamos performance.now() para mayor precisión
+        endTimer.current = null;
+        console.log("Timer iniciado...");
+      },
+      stop: function () {
+        if (initTimer.current === null) {
+          console.log("El timer no ha sido iniciado.");
+          return null;
+        }
+        endTimer.current = performance.now();
+        const elapsedTime = endTimer.current - initTimer.current;
+        console.log(`Timer detenido. Tiempo transcurrido: ${elapsedTime.toFixed(2)} ms`);
+        return elapsedTime; // Retorna el tiempo en milisegundos
+      },
+    };
   }
 
   const AddAssistantMessage = (_value) => {
@@ -361,6 +428,7 @@ const ElementProviderOpenAi = ({ children }) => {
         );
 
         const data = await response.json();
+        console.log("Esperando a OpenAi status: " + data.status)
         if (data.status === "completed") {
           return data;
         }
