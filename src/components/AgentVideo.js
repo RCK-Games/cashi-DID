@@ -15,10 +15,10 @@ const AgentVideo = () => {
   useEffect(() => {
     if (finishLoading && agentVideo != null) {
       ///Hacer algo para pedir los videos con loadedVideo
-      loadedVideo.current = emma;
+      loadedVideo.current = video1;
       console.log(agentVideo)
       if(agentVideo === "¿que es cashi?" ) {
-        loadedVideo.current = video1;
+        loadedVideo.current = video2;
       }
       if(agentVideo === "¿como funciona cashi?" ) {
         loadedVideo.current = video2;

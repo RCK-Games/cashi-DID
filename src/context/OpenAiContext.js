@@ -1,9 +1,6 @@
-import OpenAI from "openai"
-import { DataAPIClient } from "@datastax/astra-db-ts"
-
 import React, { createContext, useRef, useState } from "react";
 import { interfaceRag } from "./RagInterface.ts";
-
+import { AhoCorasickInterface, isThisQuestionReal } from "./AhoCorasick.js";
 const ElementContextOpenAi = createContext();
 
 const ElementProviderOpenAi = ({ children }) => {
@@ -11,46 +8,29 @@ const ElementProviderOpenAi = ({ children }) => {
   const [finishLoading, setFinishLoading] = useState(true);
   const [agentVideo, setAgentVideo] = useState(null);
   const ActiveThreadChecker = useRef(null);
-  const initTimer = useRef(null);
-  const endTimer = useRef(null);
   const ActiveThreadTalker = useRef(null);
-  const timer = useRef(null);
   const open_ia_key = process.env.REACT_APP_OPENAI_API_KEY
-  const assistantIdChecker = "asst_rIxnJR3uiCjMMIv599ibKFeW";
+  const assistantIdChecker = "asst_mJ0Jg04jzxZoeobPTLFLb15s";
   const assistantIdTalker = "asst_63tzfPzsH6SVUp5wtwoMtItf";
 
-	console.log(process.env.REACT_APP_ASTRA_DB_API_ENPOINT, process.env.REACT_APP_ASTRA_DB_NAMESPACE)
-
-  const client = new DataAPIClient(process.env.REACT_APP_ASTRA_DB_APPLICATION_TOKEN)
-  const db = client.db(process.env.REACT_APP_ASTRA_DB_API_ENPOINT, {namespace: process.env.REACT_APP_ASTRA_DB_NAMESPACE})
-
-
-  const openai = new OpenAI({ apiKey: open_ia_key, dangerouslyAllowBrowser: true });
   const OpenAiInterface = async (messageContent) => {
-    timer.current = createTimer();
-    
-    const keywords = [
-      "Yes.",
-      "Yes",
-      "yes",
-      "yes.",
-      "yes,",
-      "Yes,",
-      "Si.",
-      "Si",
-      "si",
-      "si.",
-      "si,",
-      "Si,",
-      "Sí.",
-      "Sí",
-      "sí",
-      "sí.",
-      "sí,",
-      "Sí,",
-    ];
+    const cronometro = new Cronometro();
+    cronometro.start();
+    console.log("Initialize Ahocorasick")
+    const AhoCorasickResult = AhoCorasickInterface(messageContent)
+    console.log(AhoCorasickResult)
+    if(AhoCorasickResult != null) {
+      if(AhoCorasickResult.length > 0){
+        console.log(cronometro.stop());
+        AddAssistantMessage(AhoCorasickResult[0]);
+        setFinishLoading(true);
+        setAgentVideo(AhoCorasickResult[0]);
+        return messageList;
+      }
+    }
+
     setFinishLoading(false);
-    console.log("Initialize Defender");
+    console.log("Initialize Defender", cronometro.markInterval());
     let _activeThreadChecker = ActiveThreadChecker.current;
     if (_activeThreadChecker === null) {
       _activeThreadChecker = await handleNewThread(true);
@@ -62,7 +42,7 @@ const ElementProviderOpenAi = ({ children }) => {
     ));
 
     if (AiCheckerResponseChecker === null) {
-      timer.current.stop(); 
+      console.log(cronometro.stop());
       AddAssistantMessage("Error en Tiempo de Espera");
       setFinishLoading(true);
       return messageList;
@@ -72,16 +52,20 @@ const ElementProviderOpenAi = ({ children }) => {
 
       if(AiCheckerResponseChecker.top_question != null){
         if(AiCheckerResponseChecker.top_question.is_top_question){
-          timer.current.stop(); 
-          AddAssistantMessage(AiCheckerResponseChecker.top_question.value);
-          setFinishLoading(true);
-          setAgentVideo(AiCheckerResponseChecker.top_question.value);
-          return messageList;
+          if(isThisQuestionReal(AiCheckerResponseChecker.top_question.value)){
+            console.log(cronometro.stop());
+            AddAssistantMessage(AiCheckerResponseChecker.top_question.value);
+            setFinishLoading(true);
+            setAgentVideo(AiCheckerResponseChecker.top_question.value);
+            return messageList;
+          }
+
         }
       }
 
-      timer.current.start();
-      console.log("Inititilize AI Response");
+     
+      console.log("Inititilize AI Response", cronometro.markInterval());
+      
       let _activeThreadTalker = ActiveThreadTalker.current;
       if (_activeThreadTalker === null) {
         _activeThreadTalker = await handleNewThread(false);
@@ -93,22 +77,22 @@ const ElementProviderOpenAi = ({ children }) => {
         await handleThreadInterface(messageContent, _activeThreadTalker, false)
       );
       if (AiCheckerResponseTalker === null) {
-        timer.current.stop(); 
+        console.log(cronometro.stop());
         AddAssistantMessage("Error en Tiempo de Espera");
         setFinishLoading(true);
         return messageList;
       }
-      //AddAssistantMessage(AiCheckerResponseTalker)
+      
       triggerApi(AiCheckerResponseTalker);
       if (agentVideo != null) {
         setAgentVideo(null);
       }
-      timer.current.stop(); 
+      console.log(cronometro.stop());
       setFinishLoading(true);
       return messageList;
     } else {
       //Idk
-      timer.current.stop(); 
+      console.log(cronometro.stop());
       AddAssistantMessage("Pregunta otra cosa");
       setFinishLoading(true);
       setAgentVideo("");
@@ -132,72 +116,10 @@ const ElementProviderOpenAi = ({ children }) => {
     return await interfaceRag(value);
   }
 
-  const triggerRAG = async (_value) => {
-	try{
-        let docContext = ""
-
-        const embedding = await openai.embeddings.create({
-            model: "text-embedding-3-small",
-            input: _value,
-            encoding_format: "float"
-        })
-		console.log("embedding")
-    console.log(embedding.data[0].embedding)
-    console.log(embedding.data)
-        try{
-            const collection = await db.collection(process.env.REACT_APP_ASTRA_DB_COLLECTION)
-            const cursor = collection.find(null, {
-                sort: {
-                    $vector: embedding.data[0].embedding,
-                },
-                limit: 10
-            })
-            console.log(cursor)
-            console.log(collection)
-            const documents = await cursor.toArray()
-
-            const docsMap = documents?.map(doc => doc.text)
-
-            docContext = JSON.stringify(docsMap)
-			console.log(docContext)
-        }catch(err){
-            console.log("Error querying db...")
-        }
-		console.log("db")
-        const template = {
-            role: "system",
-            content: `You are an AI assistant who knows everything about Cashi.
-            Use the below context to augment what you know about Cashi.
-            The context will provide you with the most recent page data from the official database,
-            If the context doesn't include the information you need answer based on your 
-            existing knowledge and don't mention the source of your information or
-            what the context does or doesn't include.
-            Format responses using markdown where applicable and don't return 
-            images.
-        ----------------
-        START CONTEXT
-        ${docContext}
-        END CONTEXT
-        ----------------
-        QUESTION ${_value}
-        -----------------
-        `
-        }
-		console.log(template)
-		return template
-		
-
-    }catch (err){
-        throw err
-    }
-  }
-
   const processJsonFile = (_value) => {
     let string
     if(_value[0] === "`"){
-      console.log(_value)
       string = _value.split("```json")
-      console.log(string)
       if(string[1][string[1].length-1] === "`"){
         return JSON.parse(string[1].slice(0, -3))
       }
@@ -206,29 +128,52 @@ const ElementProviderOpenAi = ({ children }) => {
       return JSON.parse(_value)
     }
   }
-
-  const createTimer = () => {
-    initTimer.current = null
-    endTimer.current = null
+  class Cronometro {
+    constructor() {
+      this.startTime = 0;
+      this.elapsedTime = 0;
+      this.running = false;
+      this.intervals = [];
+    }
   
-    return {
-      start: function () {
-        initTimer.current = performance.now(); // Usamos performance.now() para mayor precisión
-        endTimer.current = null;
-        console.log("Timer iniciado...");
-      },
-      stop: function () {
-        if (initTimer.current === null) {
-          console.log("El timer no ha sido iniciado.");
-          return null;
-        }
-        endTimer.current = performance.now();
-        const elapsedTime = endTimer.current - initTimer.current;
-        console.log(`Timer detenido. Tiempo transcurrido: ${elapsedTime.toFixed(2)} ms`);
-        return elapsedTime; // Retorna el tiempo en milisegundos
-      },
-    };
+    start() {
+      if (!this.running) {
+        this.startTime = performance.now() - this.elapsedTime;
+        this.running = true;
+      }
+    }
+  
+    stop() {
+      if (this.running) {
+        this.elapsedTime = performance.now() - this.startTime;
+        this.running = false;
+      }
+      return this.elapsedTime.toFixed(2);
+    }
+  
+    reset() {
+      this.startTime = 0;
+      this.elapsedTime = 0;
+      this.running = false;
+      this.intervals = [];
+    }
+  
+    markInterval() {
+      const currentTime = this.getTime();
+      const lastInterval = this.intervals.length > 0 ? this.intervals[this.intervals.length - 1] : 0;
+      let intervalTime = currentTime - lastInterval;
+      if(lastInterval === 0){
+        intervalTime = 0
+      }
+      this.intervals.push(currentTime);
+      return { totalTime: this.elapsedTime.toFixed(2), intervalTime: intervalTime.toFixed(2) };
+    }
+  
+    getTime() {
+      return this.running ? Date.now() - this.startTime : this.elapsedTime;
+    }
   }
+  
 
   const AddAssistantMessage = (_value) => {
     const newMessage = {

@@ -15,7 +15,7 @@ const StreamingApi = () => {
   let sessionId;
   let sessionClientAnswer;
 
-  let statsIntervalId;
+  let statsIntervalId = useRef(null);
   let lastBytesReceived;
   let videoIsPlaying = false;
   let streamVideoOpacity = 0;
@@ -41,7 +41,7 @@ const StreamingApi = () => {
   const presenterInputByService = {
     talks: {
       source_url:
-        "https://raw.githubusercontent.com/RCK-Games/rckbd/refs/heads/main/cashimiro__2_.png?token=GHSAT0AAAAAAC5T3ZTHHJS5OLPOWBQLIZSEZ6IWQWA",
+        "",
     },
     clips: {
       presenter_id: "v2_public_alex@qcvo4gupoy",
@@ -290,7 +290,9 @@ const StreamingApi = () => {
           });
         }catch(e){
           clearInterval(statsIntervalId)
-          console.log("Crashed: " + e.message)
+          statsIntervalId = null;
+          
+          //console.log("Crashed: " + e.message)
         }
         
 
