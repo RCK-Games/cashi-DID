@@ -65,7 +65,7 @@ const ElementProviderOpenAi = ({ children }) => {
 
      
       console.log("Inititilize AI Response", cronometro.markInterval());
-      
+      sendHeartBeat()
       let _activeThreadTalker = ActiveThreadTalker.current;
       if (_activeThreadTalker === null) {
         _activeThreadTalker = await handleNewThread(false);
@@ -112,11 +112,21 @@ const ElementProviderOpenAi = ({ children }) => {
     }
   };
 
+  const sendHeartBeat = () => {
+    const button = document.getElementById("send-heartbeat-button");
+    if (button) {
+      button.click();
+    }
+  };
+
   const useRagInterface = async (value) => {
     return await interfaceRag(value);
   }
 
   const processJsonFile = (_value) => {
+    if(_value === null) {
+      return null
+    }
     let string
     if(_value[0] === "`"){
       string = _value.split("```json")

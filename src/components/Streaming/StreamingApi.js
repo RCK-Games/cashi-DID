@@ -1,8 +1,7 @@
 import { useEffect, useRef } from "react";
 import "../../styles/Streaming.css";
-import emma from "../Streaming/cashimiro_idle.mp4"
+import emma from "../Streaming/cashimiro_idle.mp4";
 const StreamingApi = () => {
-
   const DID_API = {
     key: "Y2FzaGltaXJvLmFpQGdtYWlsLmNvbQ:rIjOUHjgu67IHsFNURkAH",
     url: "https://api.d-id.com",
@@ -19,13 +18,13 @@ const StreamingApi = () => {
   let lastBytesReceived;
   let videoIsPlaying = false;
   let streamVideoOpacity = 0;
-  let ws = useRef(null)
+  let ws = useRef(null);
   const stream_warmup = true;
   let isStreamReady = !stream_warmup;
 
   let idleVideoElement;
   let streamVideoElement;
-  console.log("Streaming API INIT")
+  console.log("Streaming API INIT");
   useEffect(() => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     idleVideoElement = document.getElementById("idle-video-element");
@@ -33,15 +32,14 @@ const StreamingApi = () => {
     streamVideoElement = document.getElementById("stream-video-element");
     idleVideoElement.setAttribute("playsinline", "");
     streamVideoElement.setAttribute("playsinline", "");
-    
+
     init();
   }, []);
-
 
   const presenterInputByService = {
     talks: {
       source_url:
-        "",
+        "https://raw.githubusercontent.com/RCK-Games/rckbd/refs/heads/main/cashimiro__2_.png?token=GHSAT0AAAAAAC5T3ZTGPS36DTSC4OF5IM5YZ6QQ4EA",
     },
     clips: {
       presenter_id: "v2_public_alex@qcvo4gupoy",
@@ -57,16 +55,16 @@ const StreamingApi = () => {
     if (peerConnection && peerConnection.connectionState === "connected") {
       return;
     }
-    makeConnection()
+    makeConnection();
   };
 
   const makeConnection = async () => {
-    console.log("CONNECTION INIT")
+    console.log("CONNECTION INIT");
     try {
       stopAllStreams();
       closePC();
 
-      ws = await connectToWebSocket(DID_API.websocketUrl, DID_API.key)
+      ws = await connectToWebSocket(DID_API.websocketUrl, DID_API.key);
       // Step 2: Send "init-stream" message to WebSocket
       const startStreamMessage = {
         type: "init-stream",
@@ -131,18 +129,18 @@ const StreamingApi = () => {
 
   ///Accionar cuando se llame el sistema para hablar
   const sendWordToServer = async () => {
-    let wordToStream
+    let wordToStream;
     const paragraph = document.getElementById("textHolder");
     if (paragraph) {
       wordToStream = paragraph.textContent;
     }
-    let text
-    if(wordToStream === undefined || wordToStream === null){
-      text = "Hello world"
-    }else{
-      text = wordToStream
+    let text;
+    if (wordToStream === undefined || wordToStream === null) {
+      text = "Hello world";
+    } else {
+      text = wordToStream;
     }
-    
+
     const chunks = text.split(" ");
 
     // Indicates end of text stream
@@ -219,11 +217,11 @@ const StreamingApi = () => {
     // not supported in firefox
     console.log("peerConnection", peerConnection.connectionState);
     if (peerConnection.connectionState === "failed") {
-      init()
+      return
     }
 
-    if(peerConnection === null){
-      return
+    if (peerConnection === null) {
+      return;
     }
 
     if (peerConnection.connectionState === "connected") {
@@ -266,41 +264,38 @@ const StreamingApi = () => {
 
     if (!event.track) return;
 
-    try{
-      statsIntervalId = setInterval(async () => {
+    try {
+      statsIntervalId.current = setInterval(async () => {
+        if (!peerConnection || peerConnection.connectionState === "closed") {
+          clearInterval(statsIntervalId.current);
+          statsIntervalId.current = null;
+          return;
+        }
 
-        if(peerConnection === null){
-          clearInterval(statsIntervalId)
+        if(event.track.readyState === "ended"){
+          console.log("ended")
+          clearInterval(statsIntervalId.current);
           return
         }
-        try{
-          const stats = await peerConnection.getStats(event.track);
-          stats.forEach((report) => {
-            if (report.type === "inbound-rtp" && report.kind === "video") {
-              // eslint-disable-next-line no-mixed-operators
-              const videoStatusChanged =
-                videoIsPlaying !== report.bytesReceived > lastBytesReceived;
-    
-              if (videoStatusChanged) {
-                videoIsPlaying = report.bytesReceived > lastBytesReceived;
-                onVideoStatusChange(videoIsPlaying, event.streams[0]);
-              }
-              lastBytesReceived = report.bytesReceived;
+        const stats = await peerConnection.getStats(event.track);
+        stats.forEach((report) => {
+          if (report.type === "inbound-rtp" && report.kind === "video") {
+            // eslint-disable-next-line no-mixed-operators
+            const videoStatusChanged =
+              videoIsPlaying !== report.bytesReceived > lastBytesReceived;
+
+            if (videoStatusChanged) {
+              videoIsPlaying = report.bytesReceived > lastBytesReceived;
+              onVideoStatusChange(videoIsPlaying, event.streams[0]);
             }
-          });
-        }catch(e){
-          clearInterval(statsIntervalId)
-          statsIntervalId = null;
-          
-          //console.log("Crashed: " + e.message)
-        }
-        
-
+            lastBytesReceived = report.bytesReceived;
+          }
+        });
       }, 500);
-    }catch(e){
-      console.log("Crashed: " + e.message)
+    } catch (e) {
+      console.log("Crashed: " + e.message);
+      console.log(statsIntervalId.current);
     }
-
   }
 
   function onStreamEvent(message) {
@@ -425,7 +420,10 @@ const StreamingApi = () => {
     pc.removeEventListener("track", onTrack, true);
     pcDataChannel.removeEventListener("message", onStreamEvent, true);
 
-    clearInterval(statsIntervalId);
+    if (statsIntervalId.current) {
+      clearInterval(statsIntervalId.current);
+      statsIntervalId.current = null;
+    }
     isStreamReady = !stream_warmup;
     streamVideoOpacity = 0;
     console.log("stopped peer connection");
@@ -463,26 +461,62 @@ const StreamingApi = () => {
     }
   }
 
+  async function sendHeartbeat(ws) {
+    if (ws.readyState !== WebSocket.OPEN || ws.readyState !== WebSocket.CONNECTING) {
+      await makeConnection();
+    }
+    ws.send("");
+  }
+
   return (
     <div className="AgentContainer">
       <div id="content">
-        
-          <video
-            id="idle-video-element"
-            autoPlay
-            muted
-            loop
-            className="videoElementContainer"
-            style={{ opacity: 1 }}
-          ><source src={emma}  type="video/mp4" /></video>
-          <video
-            id="stream-video-element"
-            autoPlay
-            className="videoElementContainer"
-            style={{ opacity: 0 }}
-          ></video>
+        <video
+          id="idle-video-element"
+          autoPlay
+          muted
+          loop
+          className="videoElementContainer"
+          style={{ opacity: 1 }}
+        >
+          <source src={emma} type="video/mp4" />
+        </video>
+        <video
+          id="stream-video-element"
+          autoPlay
+          className="videoElementContainer"
+          style={{ opacity: 0 }}
+          onEnded={() => console.log("end")}
+        ></video>
       </div>
-      <button id="stream-word-button" type="button" style={{height: "0px", padding: "0px", margin: "0px",width: "0px", position: "absolute"}} onClick={sendWordToServer}>Stream word</button>
+      <button
+        id="send-heartbeat-button"
+        type="button"
+        style={{
+          height: "0px",
+          padding: "0px",
+          margin: "0px",
+          width: "0px",
+          position: "absolute",
+        }}
+        onClick={sendHeartbeat}
+      ></button>
+      <button
+        id="stream-word-button"
+        type="button"
+        style={{
+          height: "0px",
+          padding: "0px",
+          margin: "0px",
+          width: "0px",
+          position: "absolute",
+        }}
+        onClick={sendWordToServer}
+      >
+        
+
+        Stream word
+      </button>
     </div>
   );
 };
