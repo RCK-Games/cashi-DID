@@ -39,6 +39,7 @@ function DIdAgentDemo () {
     const init = async ()=>{
       let hold = await sdk.createAgentManager(agentId, { auth, callbacks, streamOptions });
       agentManager = hold
+      console.log("render")
       setAgentManager(hold);
         console.log("sdk.createAgentManager()", hold)
         document.querySelector("#videoElement").style.backgroundImage = `url(${hold.agent.presenter.source_url})`

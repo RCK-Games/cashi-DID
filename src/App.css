@@ -97,14 +97,14 @@ div {
 
 .header-item.right {
   margin-right: 3%;
-  width: 5%;
-  height: 2%;
+  width: 70px;
+  height: 20px;
 }
 
 .header-item.left {
   margin-left: 3%;
-  width: 2%;
-  height: 2%;
+  width: 29px;
+  height: 19px;
 }
 
 #previewName {
@@ -141,6 +141,23 @@ div {
   color: black;
 }
 
+@media(max-width: 400px){
+  .header-item.right {
+    width: 40px;
+    height: auto;
+  }
+  
+  .header-item.left {
+    width: 20px;
+    height: auto;
+  }
+
+  .header-item.center {
+    font-size: 13px !important;
+    padding-top: 10px;
+  }
+}
+
 @media(max-width: 768px) {
   .inputsDiv {
     display: flex;
@@ -166,15 +183,6 @@ div {
     -moz-border-radius: 50%;
     -ms-border-radius: 50%;
     -o-border-radius: 50%;
-  }
-  .header-item.right {
-    width: 15%;
-    height: 10%;
-  }
-  
-  .header-item.left {
-    width: 5%;
-    height: 5%;
   }
 }
 #textArea::placeholder{

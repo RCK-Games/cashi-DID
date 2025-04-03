@@ -1,6 +1,7 @@
 import React, { createContext, useRef, useState } from "react";
 import { interfaceRag } from "./RagInterface.ts";
 import { AhoCorasickInterface, isThisQuestionReal } from "./AhoCorasick.js";
+import { AhoCorasickInterfaceBadWords } from "./AhoCorasickBadWords.js";
 const ElementContextOpenAi = createContext();
 
 const ElementProviderOpenAi = ({ children }) => {
@@ -16,7 +17,18 @@ const ElementProviderOpenAi = ({ children }) => {
   const OpenAiInterface = async (messageContent) => {
     const cronometro = new Cronometro();
     cronometro.start();
-    console.log("Initialize Ahocorasick")
+    const AhoCorasickBadWords = AhoCorasickInterfaceBadWords(messageContent)
+    if(AhoCorasickBadWords != null) {
+      if(AhoCorasickBadWords.length > 0){
+        console.log(cronometro.stop());
+        AddAssistantMessage("Bad Word");
+        setFinishLoading(true);
+        setAgentVideo("Bad Word");
+        return messageList;
+      }
+    }
+
+
     const AhoCorasickResult = AhoCorasickInterface(messageContent)
     console.log(AhoCorasickResult)
     if(AhoCorasickResult != null) {

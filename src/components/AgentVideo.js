@@ -32,6 +32,9 @@ const AgentVideo = () => {
       if(agentVideo === "¿como accedo a mi cuenta?" ) {
         loadedVideo.current = video5;
       }
+      if(agentVideo === "Bad Word" ) {
+        loadedVideo.current = video5;
+      }
       setIsVideoLoaded(true);
     }
   }, [agentVideo, finishLoading, loadedVideo]);

@@ -52,3 +52,36 @@
     font-size: 8px;
 }
 
+
+.titleLogin{
+    color: #5C1F99;
+    font-size: 53px;
+    margin-top: 20vh;
+    margin-bottom: 0;
+    text-align: center;
+}
+
+.subTitleLogin{
+    font-size: 21px;
+    text-align: center;
+    margin-top: 0;
+    color: #5C1F99;
+}
+
+@media(max-width: 325px){
+    .titleLogin{
+        font-size: 40px;
+    }
+    
+    .subTitleLogin{
+        font-size: 18px;
+
+    }
+  }
+
+.errorText{
+    font-size: 15px;
+    color: red;
+    font-style: italic;
+    margin: 0px;
+}
