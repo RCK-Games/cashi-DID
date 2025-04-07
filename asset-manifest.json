@@ -1,16 +1,23 @@
 {
   "files": {
-    "main.css": "/cashi-DID/static/css/main.ecd234fa.css",
-    "main.js": "/cashi-DID/static/js/main.a4655dad.js",
-    "static/js/488.07e83a64.chunk.js": "/cashi-DID/static/js/488.07e83a64.chunk.js",
-    "static/media/logo.svg": "/cashi-DID/static/media/logo.6ce24c58023cc2f8fd88fe9d219db6c6.svg",
+    "main.css": "/cashi-DID/static/css/main.ecf5d3b5.css",
+    "main.js": "/cashi-DID/static/js/main.bc28660c.js",
+    "static/js/488.c43d468b.chunk.js": "/cashi-DID/static/js/488.c43d468b.chunk.js",
+    "static/media/video (3).mp4": "/cashi-DID/static/media/video (3).a5c3aa6c568fd8f5a133.mp4",
+    "static/media/video (5).mp4": "/cashi-DID/static/media/video (5).90f1d25a2a9fb8d44f61.mp4",
+    "static/media/video (4).mp4": "/cashi-DID/static/media/video (4).a99139f3a8892359ac9c.mp4",
+    "static/media/video (2).mp4": "/cashi-DID/static/media/video (2).7ba89a168d72d5544bcf.mp4",
+    "static/media/video (1).mp4": "/cashi-DID/static/media/video (1).7766a7463b3f1a8970ac.mp4",
+    "static/media/emma_idle.mp4": "/cashi-DID/static/media/emma_idle.ad21f88b06e809fe0369.mp4",
+    "static/media/cashimiro_idle.mp4": "/cashi-DID/static/media/cashimiro_idle.70327d1971d691efb0a7.mp4",
+    "static/media/index.cjs": "/cashi-DID/static/media/index.30be8a239ed7d6533cef.cjs",
     "index.html": "/cashi-DID/index.html",
-    "main.ecd234fa.css.map": "/cashi-DID/static/css/main.ecd234fa.css.map",
-    "main.a4655dad.js.map": "/cashi-DID/static/js/main.a4655dad.js.map",
-    "488.07e83a64.chunk.js.map": "/cashi-DID/static/js/488.07e83a64.chunk.js.map"
+    "main.ecf5d3b5.css.map": "/cashi-DID/static/css/main.ecf5d3b5.css.map",
+    "main.bc28660c.js.map": "/cashi-DID/static/js/main.bc28660c.js.map",
+    "488.c43d468b.chunk.js.map": "/cashi-DID/static/js/488.c43d468b.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.ecd234fa.css",
-    "static/js/main.a4655dad.js"
+    "static/css/main.ecf5d3b5.css",
+    "static/js/main.bc28660c.js"
   ]
 }
