@@ -2,6 +2,7 @@ import React, { createContext, useRef, useState } from "react";
 import { interfaceRag } from "./RagInterface.ts";
 import { AhoCorasickInterface, isThisQuestionReal } from "./AhoCorasick.js";
 import { badWordsChecker } from "./AhoCorasickBadWords.js";
+import {cashimiroDefenderInstructions, cashimiroTalkerInstructions} from "./SystemInstructions.js"
 const ElementContextOpenAi = createContext();
 
 const ElementProviderOpenAi = ({ children }) => {
@@ -11,7 +12,6 @@ const ElementProviderOpenAi = ({ children }) => {
   const ActiveThreadChecker = useRef(null);
   const ActiveThreadTalker = useRef(null);
   const open_ia_key = process.env.REACT_APP_OPENAI_API_KEY
- const vector_store_ids = []
   const OpenAiInterface = async (messageContent) => {
     const cronometro = new Cronometro();
     cronometro.start();
@@ -28,7 +28,6 @@ const ElementProviderOpenAi = ({ children }) => {
 
     
     const AhoCorasickResult = AhoCorasickInterface(messageContent)
-    console.log(AhoCorasickResult)
     if(AhoCorasickResult != null) {
       if(AhoCorasickResult.length > 0){
         console.log(cronometro.stop());
@@ -42,13 +41,12 @@ const ElementProviderOpenAi = ({ children }) => {
     setFinishLoading(false);
     console.log("Initialize Defender", cronometro.markInterval());
     let _activeThreadChecker = ActiveThreadChecker.current;
-
+    
     const AiCheckerResponseChecker = processJsonFile(await handleThreadInterface(
       messageContent,
       _activeThreadChecker,
       true
     ));
-
     if (AiCheckerResponseChecker === null) {
       console.log(cronometro.stop());
       AddAssistantMessage("Error en Tiempo de Espera");
@@ -85,7 +83,7 @@ const ElementProviderOpenAi = ({ children }) => {
         setFinishLoading(true);
         return messageList;
       }
-      
+      AddAssistantMessage(AiCheckerResponseTalker);
       triggerApi(AiCheckerResponseTalker);
       if (agentVideo != null) {
         setAgentVideo(null);
@@ -122,6 +120,7 @@ const ElementProviderOpenAi = ({ children }) => {
     }
   };
 
+  // eslint-disable-next-line no-unused-vars
   const useRagInterface = async (value) => {
     return await interfaceRag(value);
   }
@@ -223,19 +222,13 @@ const ElementProviderOpenAi = ({ children }) => {
     isChecker
   ) => {
     try {
-      console.log("Thread: ", messageContent, openThread, isChecker);
-      const response = await promiseWithTimeout(
-        handleCompletition(messageContent, openThread),
-        30000,
-        "Timeout in handleMessageToThread"
-      );
-
+      const response = await handleCompletition(messageContent, isChecker)
       if (isChecker === false) {
         AddAssistantMessage(
           removeSource(response.output[0].content[0].text)
         );
       }
-      return response.output[0].content[0].text.toLowerCase();
+      return response.output[response.output.length-1].content[0].text.toLowerCase();
     } catch (e) {
       return null;
     }
@@ -277,16 +270,18 @@ const ElementProviderOpenAi = ({ children }) => {
   }
 
   const handleCompletition = async (newMessage, isChecker) => {
-    let systemInstructions
+       let systemInstructions
+    let vectorStore
     let activeThread = null
     if(isChecker){
-      systemInstructions = "checas";
+      vectorStore = ["vs_67c9ce94d8748191898d32452b114b16"]
+      systemInstructions = cashimiroDefenderInstructions;
     }else{
-      systemInstructions = "no checas"
+      systemInstructions = cashimiroTalkerInstructions
+      vectorStore = ["vs_67c6094fd0d481919f08dd91550805c4"]
       activeThread = ActiveThreadTalker.current
     }
-
-    try {
+    try { 
       const response = await fetch("https://api.openai.com/v1/responses", {
         method: "POST",
         headers: {
@@ -301,11 +296,12 @@ const ElementProviderOpenAi = ({ children }) => {
           previous_response_id: activeThread,
           tools: [{
             type: "file_search",
-            vector_store_ids: vector_store_ids,
+            vector_store_ids: vectorStore,
             max_num_results: 1
           }],
         }),
       });
+
       const data = await response.json();
       if(isChecker === false){
         ActiveThreadTalker.current = data.id;
