@@ -11,9 +11,7 @@ const ElementProviderOpenAi = ({ children }) => {
   const ActiveThreadChecker = useRef(null);
   const ActiveThreadTalker = useRef(null);
   const open_ia_key = process.env.REACT_APP_OPENAI_API_KEY
-  const assistantIdChecker = "asst_mJ0Jg04jzxZoeobPTLFLb15s";
-  const assistantIdTalker = "asst_63tzfPzsH6SVUp5wtwoMtItf";
-
+ const vector_store_ids = []
   const OpenAiInterface = async (messageContent) => {
     const cronometro = new Cronometro();
     cronometro.start();
@@ -44,9 +42,7 @@ const ElementProviderOpenAi = ({ children }) => {
     setFinishLoading(false);
     console.log("Initialize Defender", cronometro.markInterval());
     let _activeThreadChecker = ActiveThreadChecker.current;
-    if (_activeThreadChecker === null) {
-      _activeThreadChecker = await handleNewThread(true);
-    }
+
     const AiCheckerResponseChecker = processJsonFile(await handleThreadInterface(
       messageContent,
       _activeThreadChecker,
@@ -75,18 +71,13 @@ const ElementProviderOpenAi = ({ children }) => {
         }
       }
 
-     
       console.log("Inititilize AI Response", cronometro.markInterval());
       sendHeartBeat()
-      let _activeThreadTalker = ActiveThreadTalker.current;
-      if (_activeThreadTalker === null) {
-        _activeThreadTalker = await handleNewThread(false);
-      }
 
 	    //messageContent = await interfaceRag(messageContent)
 
       const AiCheckerResponseTalker = removeSource(
-        await handleThreadInterface(messageContent, _activeThreadTalker, false)
+        await handleThreadInterface(messageContent, false)
       );
       if (AiCheckerResponseTalker === null) {
         console.log(cronometro.stop());
@@ -233,35 +224,18 @@ const ElementProviderOpenAi = ({ children }) => {
   ) => {
     try {
       console.log("Thread: ", messageContent, openThread, isChecker);
-      await promiseWithTimeout(
-        handleMessageToThread(messageContent, openThread),
-        10000,
+      const response = await promiseWithTimeout(
+        handleCompletition(messageContent, openThread),
+        30000,
         "Timeout in handleMessageToThread"
-      );
-
-      let data = await promiseWithTimeout(
-        handleRun(openThread, isChecker),
-        30000,
-        "Timeout en handleRun"
-      );
-      await promiseWithTimeout(
-        checkRunStatus(data.id, openThread),
-        30000,
-        "Timeout in checkRunStatus"
-      );
-
-      let response = await promiseWithTimeout(
-        fetchMessages(openThread, isChecker),
-        20000,
-        "Timeout in fetchMessages"
       );
 
       if (isChecker === false) {
         AddAssistantMessage(
-          removeSource(response.data[0].content[0].text.value)
+          removeSource(response.output[0].content[0].text)
         );
       }
-      return response.data[0].content[0].text.value.toLowerCase();
+      return response.output[0].content[0].text.toLowerCase();
     } catch (e) {
       return null;
     }
@@ -302,132 +276,44 @@ const ElementProviderOpenAi = ({ children }) => {
     });
   }
 
-  const handleNewThread = async (isChecker) => {
+  const handleCompletition = async (newMessage, isChecker) => {
+    let systemInstructions
+    let activeThread = null
+    if(isChecker){
+      systemInstructions = "checas";
+    }else{
+      systemInstructions = "no checas"
+      activeThread = ActiveThreadTalker.current
+    }
+
     try {
-      const response = await fetch("https://api.openai.com/v1/threads", {
+      const response = await fetch("https://api.openai.com/v1/responses", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${open_ia_key}`,
           "Content-Type": "application/json",
           "OpenAI-Beta": "assistants=v2",
         },
-        body: JSON.stringify({}),
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          instructions: `${systemInstructions}`,
+          input: `${newMessage}`,
+          previous_response_id: activeThread,
+          tools: [{
+            type: "file_search",
+            vector_store_ids: vector_store_ids,
+            max_num_results: 1
+          }],
+        }),
       });
       const data = await response.json();
-      if (isChecker) {
-        ActiveThreadChecker.current = data.id;
-      } else {
+      if(isChecker === false){
         ActiveThreadTalker.current = data.id;
       }
-      return data.id;
-    } catch (error) {
-      console.error("Error in creating a new Thread:", error);
-    }
-  };
 
-  const handleMessageToThread = async (newMessage, activeThread) => {
-    try {
-      const response = await fetch(
-        `https://api.openai.com/v1/threads/${activeThread}/messages`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${open_ia_key}`,
-            "Content-Type": "application/json",
-            "OpenAI-Beta": "assistants=v2",
-          },
-          body: JSON.stringify({
-            role: "user",
-            content: `${newMessage}`,
-          }),
-        }
-      );
-      return response;
-    } catch (error) {
-      console.error("Failed to send message to thread:", error);
-    }
-  };
-
-  const handleRun = async (activeThread, isChecker) => {
-    let assistantId;
-    if (isChecker) {
-      assistantId = assistantIdChecker;
-    } else {
-      assistantId = assistantIdTalker;
-    }
-    try {
-      const response = await fetch(
-        `https://api.openai.com/v1/threads/${activeThread}/runs`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${open_ia_key}`,
-            "Content-Type": "application/json",
-            "OpenAI-Beta": "assistants=v2",
-          },
-          body: JSON.stringify({
-            assistant_id: `${assistantId}`,
-            model: "gpt-4o-mini",
-          }),
-        }
-      );
-      const data = await response.json();
       return data;
     } catch (error) {
-      console.error("Failed to handle run:", error);
-    }
-  };
-
-  const checkRunStatus = async (runId, activeThread) => {
-    try {
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        const response = await fetch(
-          `https://api.openai.com/v1/threads/${activeThread}/runs/${runId}`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${open_ia_key}`,
-              "Content-Type": "application/json",
-              "OpenAI-Beta": "assistants=v2",
-            },
-          }
-        );
-
-        const data = await response.json();
-        console.log("Esperando a OpenAi status: " + data.status)
-        if (data.status === "completed") {
-          return data;
-        }
-
-        if (data.status === undefined) {
-          return;
-        }
-
-        await new Promise((resolve) => setTimeout(resolve, 3000));
-      }
-    } catch (error) {
-      console.error("Failed to check run status:", error);
-    }
-  };
-
-  const fetchMessages = async (activeThread) => {
-    try {
-      const response = await fetch(
-        `https://api.openai.com/v1/threads/${activeThread}/messages?limit=100`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${open_ia_key}`,
-            "Content-Type": "application/json",
-            "OpenAI-Beta": "assistants=v2",
-          },
-        }
-      );
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error("Failed to fetch messages:", error);
+      console.error("Error in processing Thread:", error);
     }
   };
 
